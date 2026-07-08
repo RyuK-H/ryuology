@@ -1,0 +1,38 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import { getPublishedPosts } from '../../lib/posts';
+
+const posts = await getPublishedPosts();
+const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
+---
+
+<Base title="글">
+  <h1>글</h1>
+  {
+    tags.length > 0 && (
+      <p class="tags">
+        {tags.map((tag) => (
+          <a href={`/tags/${tag}/`}>#{tag}</a>
+        ))}
+      </p>
+    )
+  }
+  <PostList posts={posts} />
+</Base>
+
+<style>
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.9375rem;
+  }
+  .tags a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .tags a:hover {
+    color: var(--accent);
+  }
+</style>

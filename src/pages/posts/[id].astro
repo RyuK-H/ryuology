@@ -1,0 +1,68 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { SITE } from '../../site';
+import { getPublishedPosts, formatDate } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate.toISOString(),
+  ...(post.data.updatedDate && { dateModified: post.data.updatedDate.toISOString() }),
+  author: { '@type': 'Person', name: SITE.author },
+  url: new URL(`/posts/${post.id}/`, Astro.site).href,
+  keywords: post.data.tags.join(', '),
+  inLanguage: SITE.lang,
+});
+---
+
+<Base title={post.data.title} description={post.data.description}>
+  <script type="application/ld+json" set:html={jsonLd} slot="head" />
+  <article>
+    <h1>{post.data.title}</h1>
+    <p class="meta">
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+      {
+        post.data.updatedDate && (
+          <span>
+            (수정: <time datetime={post.data.updatedDate.toISOString()}>{formatDate(post.data.updatedDate)}</time>)
+          </span>
+        )
+      }
+      {post.data.tags.map((tag) => <a href={`/tags/${tag}/`}>#{tag}</a>)}
+      · <a href={`/posts/${post.id}.md`}>.md</a>
+    </p>
+    <p class="tldr">{post.data.description}</p>
+    <Content />
+  </article>
+</Base>
+
+<style>
+  .meta {
+    color: var(--muted);
+    font-size: 0.875rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0;
+  }
+  .meta a {
+    color: var(--muted);
+  }
+  .tldr {
+    border-left: 3px solid var(--accent);
+    padding: 0.25rem 1rem;
+    color: var(--muted);
+    margin: 1.5rem 0;
+  }
+</style>

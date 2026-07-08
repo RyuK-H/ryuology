@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import PostList from '../components/PostList.astro';
+import { SITE } from '../site';
+import { getPublishedPosts } from '../lib/posts';
+
+const posts = (await getPublishedPosts()).slice(0, 10);
+---
+
+<Base>
+  <p class="tagline">{SITE.tagline}</p>
+  <p class="intro">{SITE.description}</p>
+  <h2>최근 글</h2>
+  <PostList posts={posts} />
+  <p><a href="/posts/">전체 글 보기 →</a></p>
+</Base>
+
+<style>
+  .tagline {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0.5rem 0 0.25rem;
+  }
+  .intro {
+    color: var(--muted);
+    margin-top: 0;
+  }
+</style>
