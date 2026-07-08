@@ -2,3 +2,7 @@ node_modules/
 dist/
 .astro/
 .DS_Store
+
+# 비밀값은 레포에 절대 넣지 않는다 — Cloudflare 대시보드 환경변수 사용
+.env
+.env.*
