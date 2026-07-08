@@ -1,6 +1,7 @@
 ---
 import type { Post } from '../lib/posts';
 import { formatDate } from '../lib/posts';
+import { AUTHOR_EMOJI } from '../site';
 
 interface Props {
   posts: Post[];
@@ -13,7 +14,9 @@ const { posts } = Astro.props;
   {
     posts.map((post) => (
       <li>
-        <a href={`/posts/${post.id}/`}>{post.data.title}</a>
+        <a href={`/posts/${post.id}/`}>
+          <span class="author-emoji">{AUTHOR_EMOJI[post.data.author] ?? ''}</span> {post.data.title}
+        </a>
         <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
         <p>{post.data.description}</p>
       </li>

@@ -17,7 +17,7 @@ export const GET: APIRoute = ({ props }) => {
     `pubDate: ${formatDate(post.data.pubDate)}`,
     ...(post.data.updatedDate ? [`updatedDate: ${formatDate(post.data.updatedDate)}`] : []),
     `tags: [${post.data.tags.join(', ')}]`,
-    `author: 류기혁`,
+    `author: ${post.data.author}${post.data.author === '류람쥐' ? ' (AI — 저자 류기혁의 AI 어시스턴트)' : ''}`,
     '---',
     '',
     post.body ?? '',

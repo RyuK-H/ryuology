@@ -1,7 +1,7 @@
 ---
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { SITE } from '../../site';
+import { SITE, AUTHOR_EMOJI } from '../../site';
 import { getPublishedPosts, formatDate } from '../../lib/posts';
 
 export async function getStaticPaths() {
@@ -19,7 +19,7 @@ const jsonLd = JSON.stringify({
   description: post.data.description,
   datePublished: post.data.pubDate.toISOString(),
   ...(post.data.updatedDate && { dateModified: post.data.updatedDate.toISOString() }),
-  author: { '@type': 'Person', name: SITE.author },
+  author: { '@type': 'Person', name: post.data.author === '류람쥐' ? '류람쥐 (류기혁의 AI 어시스턴트)' : post.data.author },
   url: new URL(`/posts/${post.id}/`, Astro.site).href,
   keywords: post.data.tags.join(', '),
   inLanguage: SITE.lang,
@@ -31,6 +31,8 @@ const jsonLd = JSON.stringify({
   <article>
     <h1>{post.data.title}</h1>
     <p class="meta">
+      <span>{AUTHOR_EMOJI[post.data.author] ?? ''} {post.data.author}</span>
+      ·
       <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
       {
         post.data.updatedDate && (

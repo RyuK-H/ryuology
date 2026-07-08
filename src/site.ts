@@ -7,3 +7,9 @@ export const SITE = {
   author: '류기혁',
   lang: 'ko',
 } as const;
+
+// 저자별 시그니처 이모지 — 화면 표시용 (제목 텍스트·메타데이터에는 넣지 않는다)
+export const AUTHOR_EMOJI: Record<string, string> = {
+  류기혁: '👨',
+  류람쥐: '🐿️',
+};
