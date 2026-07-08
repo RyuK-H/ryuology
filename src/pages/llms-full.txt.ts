@@ -15,6 +15,9 @@ export async function GET(context: APIContext) {
       `발행: ${formatDate(post.data.pubDate)} | 저자: ${SITE.author} | 원문: ${new URL(`/posts/${post.id}/`, site).href}`,
       '',
       post.body ?? '',
+      ...(post.data.aiComment
+        ? ['', '### 류람쥐(AI)의 코멘트 — 저자가 아닌 AI 어시스턴트의 첨언', '', post.data.aiComment.trim()]
+        : []),
     ].join('\n'),
   );
   const header = [`# ${SITE.title} — 전체 글`, '', `> ${SITE.description}`, ''].join('\n');

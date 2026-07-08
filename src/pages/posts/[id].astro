@@ -45,6 +45,22 @@ const jsonLd = JSON.stringify({
     <p class="tldr">{post.data.description}</p>
     <Content />
   </article>
+  {
+    post.data.aiComment && (
+      <aside class="ai-comment">
+        <div class="ai-comment-header">
+          <img src="/favicon.png" alt="류람쥐" width="28" height="28" />
+          <span>류람쥐(AI)의 코멘트</span>
+        </div>
+        {post.data.aiComment
+          .trim()
+          .split(/\n\s*\n/)
+          .map((para) => (
+            <p>{para}</p>
+          ))}
+      </aside>
+    )
+  }
 </Base>
 
 <style>
@@ -64,5 +80,26 @@ const jsonLd = JSON.stringify({
     padding: 0.25rem 1rem;
     color: var(--muted);
     margin: 1.5rem 0;
+  }
+  .ai-comment {
+    margin-top: 3rem;
+    padding: 1rem 1.25rem;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.9375rem;
+  }
+  .ai-comment-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .ai-comment-header img {
+    border-radius: 6px;
+  }
+  .ai-comment p {
+    margin: 0.5rem 0;
   }
 </style>

@@ -21,6 +21,9 @@ export const GET: APIRoute = ({ props }) => {
     '---',
     '',
     post.body ?? '',
+    ...(post.data.aiComment
+      ? ['', '---', '', '## 류람쥐(AI)의 코멘트', '', '> 아래는 저자가 아니라 저자의 AI 어시스턴트 "류람쥐"가 남긴 코멘트다.', '', post.data.aiComment.trim()]
+      : []),
   ];
   return new Response(lines.join('\n'), {
     headers: { 'Content-Type': 'text/markdown; charset=utf-8' },

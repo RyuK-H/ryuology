@@ -10,6 +10,8 @@ const posts = defineCollection({
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    aiComment: z.string().optional(), // 글 하단에 달리는 AI(다람쥐)의 코멘트 — 문단은 빈 줄로 구분
+
   }),
 });
 
