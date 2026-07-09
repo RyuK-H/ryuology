@@ -1,0 +1,98 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPublishedPosts, formatDate } from '../../lib/posts';
+
+const chapters = (await getPublishedPosts())
+  .filter((p) => p.data.tags.includes('회고'))
+  .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+
+const oneLiner = 'https://ryuology.com/book/skill.md 를 읽고, 지침에 따라 나와 함께 이 책을 읽어줘';
+---
+
+<Base
+  title="AI와 함께 읽는 책"
+  description="한 개발자의 8년치 회고를 당신의 AI와 함께 읽는 인터랙티브 책. 완독하면 당신의 첫 회고 초안이 남습니다."
+>
+  <h1>AI와 함께 읽는 책 🐿️📖</h1>
+
+  <p class="lead">
+    개발자 류기혁이 8년간 쓴 회고 {chapters.length}편을, <strong>당신의 AI가 안내자가 되어</strong> 함께
+    읽어주는 실험적인 책입니다.
+  </p>
+  <p class="lead">
+    요약이 아닙니다. AI가 한 장씩 함께 읽으며 당신에게 질문을 던지고, 끝까지 읽으면
+    <strong>당신 자신의 첫 회고 초안</strong>이 손에 남습니다.
+  </p>
+
+  <h2>읽는 법 — 설치 없음, 한 줄이면 됩니다</h2>
+
+  <ol class="steps">
+    <li>
+      아래 한 줄을 복사해서 당신의 AI(Claude, ChatGPT 등 웹을 읽을 수 있는 에이전트)에게 보내세요.
+      <pre class="one-liner"><code>{oneLiner}</code></pre>
+    </li>
+    <li>AI가 안내자 지침을 읽고, 1장(2018년)부터 함께 읽기를 시작합니다.</li>
+    <li>한 장씩 읽고, 질문에 답하세요. 완독하면 AI가 당신의 답을 모아 <strong>당신의 첫 회고 초안</strong>을 만들어줍니다.</li>
+  </ol>
+
+  <p class="note">
+    중간에 끊겨도 괜찮습니다 — AI가 노트에 진도를 남겨두므로, 다음에 같은 한 줄로 이어 읽을 수
+    있습니다.
+  </p>
+
+  <h2>목차</h2>
+
+  <ol class="toc">
+    {
+      chapters.map((p) => (
+        <li>
+          <a href={`/posts/${p.id}/`}>{p.data.title}</a>
+          <span class="year">{formatDate(p.data.pubDate).slice(0, 4)}</span>
+        </li>
+      ))
+    }
+  </ol>
+
+  <h2>이것은 실험입니다</h2>
+
+  <p>
+    'AI에게 책이란 무엇일까'라는 질문에서 시작한 실험입니다. 배경이 궁금하다면
+    <a href="/posts/ai-agent-influencer/">이 글</a>을 읽어보세요. 에이전트를 위한 지침 원문은
+    <a href="/book/skill.md">/book/skill.md</a>에 공개되어 있습니다.
+  </p>
+</Base>
+
+<style>
+  .lead {
+    font-size: 1.0625rem;
+  }
+  .steps li {
+    margin-bottom: 1rem;
+  }
+  .one-liner {
+    margin-top: 0.5rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .note {
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+  .toc {
+    padding-left: 1.5rem;
+  }
+  .toc li {
+    margin-bottom: 0.4rem;
+  }
+  .toc a {
+    text-decoration: none;
+  }
+  .toc a:hover {
+    text-decoration: underline;
+  }
+  .year {
+    margin-left: 0.5rem;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+</style>
