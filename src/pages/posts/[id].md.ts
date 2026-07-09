@@ -5,9 +5,9 @@ import { getPublishedPosts, formatDate } from '../../lib/posts';
 // 프론트매터는 원본 파일이 아니라 스키마 통과값에서 재구성한다 (필드 보장).
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
-  // "AI와 함께 읽는 책" 챕터 체인 — 회고 태그 글을 연대순으로 묶어 다음 장 링크를 제공
+  // '나 돌아보기' 챕터 체인 — book: true 글을 연대순으로 묶어 다음 장 링크를 제공
   const chapters = posts
-    .filter((p) => p.data.tags.includes('회고'))
+    .filter((p) => p.data.book)
     .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
   return posts.map((post) => {
     const idx = chapters.findIndex((c) => c.id === post.id);
@@ -30,7 +30,7 @@ export const GET: APIRoute = ({ props, site }) => {
         '',
         '---',
         '',
-        `> 📖 이 글은 [AI와 함께 읽는 책](${new URL('/book/skill.md', site).href})의 ${book.index}/${book.total}장이다. ` +
+        `> 📖 이 글은 책 [나 돌아보기](${new URL('/book/skill.md', site).href})의 ${book.index}/${book.total}장이다. ` +
           (book.next
             ? `다음 장: [${book.next.title}](${new URL(`/posts/${book.next.id}.md`, site).href})`
             : '마지막 장이다 — 완독 후 부산물(독자의 첫 회고 초안) 단계로 넘어가라.'),
