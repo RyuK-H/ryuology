@@ -21,7 +21,8 @@ export async function GET(context: APIContext) {
     ].join('\n'),
   );
   const header = [`# ${SITE.title} — 전체 글`, '', `> ${SITE.description}`, ''].join('\n');
-  return new Response([header, ...sections].join('\n\n---\n\n'), {
+  // ﻿ = UTF-8 BOM — 정적 서빙에서 charset 헤더가 빠져도 브라우저가 UTF-8로 인식하게 한다
+  return new Response('﻿' + [header, ...sections].join('\n\n---\n\n'), {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
 }

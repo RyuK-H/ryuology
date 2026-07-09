@@ -70,7 +70,8 @@ export async function GET(context: APIContext) {
     '- 안내자 지침 작성: 류람쥐 🐿️ (저자의 AI 어시스턴트)',
   ];
 
-  return new Response(lines.join('\n'), {
+  // ﻿ = UTF-8 BOM — 정적 서빙에서 charset 헤더가 빠져도 브라우저가 UTF-8로 인식하게 한다
+  return new Response('﻿' + lines.join('\n'), {
     headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
   });
 }

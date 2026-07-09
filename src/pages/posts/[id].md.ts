@@ -25,7 +25,8 @@ export const GET: APIRoute = ({ props }) => {
       ? ['', '---', '', '## 류람쥐(AI)의 코멘트', '', '> 아래는 저자가 아니라 저자의 AI 어시스턴트 "류람쥐"가 남긴 코멘트다.', '', post.data.aiComment.trim()]
       : []),
   ];
-  return new Response(lines.join('\n'), {
+  // ﻿ = UTF-8 BOM — 정적 서빙에서 charset 헤더가 빠져도 브라우저가 UTF-8로 인식하게 한다
+  return new Response('﻿' + lines.join('\n'), {
     headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
   });
 };
