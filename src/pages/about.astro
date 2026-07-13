@@ -1,18 +1,99 @@
 ---
 import Base from '../layouts/Base.astro';
+import { SITE, AUTHOR_PROFILES } from '../site';
+
+// Person 엔티티 허브 — "류기혁" 이름 검색에서 이 사이트가 인물과 묶이게 하는 구조화 데이터
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: {
+    '@type': 'Person',
+    name: '류기혁',
+    alternateName: ['Gi Hyuk Ryu', 'RyuK', 'Ryuk'],
+    url: new URL('/about/', Astro.site).href,
+    email: 'mailto:ryugihyeok@gmail.com',
+    jobTitle: 'Head of Blockchain Development',
+    description:
+      '블록체인 개발 조직을 이끄는 개발자. 블록체인 규제·회계감사·상장 실무, 웹3 조직 리딩, 조직 단위 AI 전환에 대해 쓴다.',
+    sameAs: [
+      AUTHOR_PROFILES.github,
+      AUTHOR_PROFILES.x,
+      AUTHOR_PROFILES.linkedin,
+      AUTHOR_PROFILES.tistory,
+    ],
+    mainEntityOfPage: Astro.site?.href,
+  },
+  inLanguage: SITE.lang,
+});
 ---
 
-<Base title="소개">
+<Base title="소개" description="류기혁 — 블록체인 개발 조직을 이끄는 개발자. RyuOlogy 저자 소개.">
+  <script type="application/ld+json" set:html={jsonLd} slot="head" />
   <h1>소개</h1>
-  <!-- TODO: 아래는 자리표시자 — 본인 문장으로 교체 -->
   <p>
     류기혁. 블록체인 개발 조직을 이끌고 있습니다. 블록체인 규제·회계감사·상장 실무, 웹3 조직 리딩,
     조직 단위 AI 전환에 대해 씁니다.
   </p>
   <p>검색해도 안 나오는, 해본 사람만 쓸 수 있는 글을 목표로 합니다.</p>
+  <p>
+    글 하단의 코멘트와 <a href="/tags/람쥐보고서/">람쥐보고서</a>는 AI 어시스턴트
+    <strong>류람쥐</strong> 🐿️가 씁니다. 사람 글과 AI 글은 모든 화면과 원문에서 구분해 표기합니다.
+  </p>
+
+  <h2>언론 보도</h2>
+  <h3>2026 — NDC26</h3>
+  <ul>
+    <li>
+      <a href="https://www.bloter.net/news/articleView.html?idxno=665773"
+        >"탈중앙화보다 이용자 보호"…넥슨의 웹3 해법 [NDC26]</a
+      > — 블로터
+    </li>
+    <li>
+      <a href="https://www.inven.co.kr/webzine/news/?news=317543"
+        >[NDC26] 자유를 스스로 닫은 블록체인, '메이플스토리 유니버스' 5년 회고</a
+      > — 인벤
+    </li>
+    <li>
+      <a href="https://www.techm.kr/news/articleView.html?idxno=152695"
+        >[NDC26] 자유와 책임의 줄타기…'메이플스토리 유니버스'가 블록체인에서 찾은 균형</a
+      > — 테크M
+    </li>
+  </ul>
+  <h3>2022 — NDC22</h3>
+  <ul>
+    <li>
+      <a href="https://www.inven.co.kr/webzine/news/?news=272717"
+        >"블록체인 게임, P2E가 아닌 핵심을 추구해야 할 때"</a
+      > — 인벤
+    </li>
+    <li>
+      <a href="https://byline.network/2022/06/10-235/">올해 NDC에서 가장 많이 나온 단어, NFT</a> —
+      바이라인네트워크
+    </li>
+    <li>
+      <a href="https://www.dailian.co.kr/news/view/1121526/"
+        >넥슨 'NDC22'…"블록체인 게임, 이상과 현실 괴리…합의점 찾아야"</a
+      > — 데일리안
+    </li>
+  </ul>
+  <h3>2018</h3>
+  <ul>
+    <li>
+      <a href="https://www.joongang.co.kr/article/22579473"
+        >이더리움 블록체인에 '판문점 선언' 새기다…"모든 데이터 사라져도 판문점 선언은 영원"</a
+      > — 중앙일보
+    </li>
+  </ul>
+
   <h2>연락</h2>
   <p>
-    <!-- TODO: 공개할 채널만 남기기 -->
-    이메일 · GitHub · LinkedIn
+    <a href="mailto:ryugihyeok@gmail.com">ryugihyeok@gmail.com</a> (개인) ·
+    <a href="mailto:k.ryu@nexpace.io">k.ryu@nexpace.io</a> (회사)
+  </p>
+  <p>
+    <a href={AUTHOR_PROFILES.github}>GitHub</a> ·
+    <a href={AUTHOR_PROFILES.linkedin}>LinkedIn</a> ·
+    <a href={AUTHOR_PROFILES.x}>X</a> ·
+    <a href={AUTHOR_PROFILES.tistory}>이전 블로그(티스토리)</a>
   </p>
 </Base>
