@@ -12,9 +12,15 @@ const jsonLd = JSON.stringify({
     alternateName: ['Gi Hyuk Ryu', 'RyuK', 'Ryuk'],
     url: new URL('/about/', Astro.site).href,
     email: 'mailto:ryugihyeok@gmail.com',
-    jobTitle: 'Head of Blockchain Development',
+    jobTitle: 'Head of Blockchain Development (블록체인 개발 총괄)',
+    worksFor: { '@type': 'Organization', name: 'NEXPACE' },
+    alumniOf: [
+      { '@type': 'Organization', name: 'Nexon Universe' },
+      { '@type': 'Organization', name: '넥슨코리아 (NEXON KOREA)' },
+      { '@type': 'Organization', name: '블록스미스 (BlockSmith)' },
+    ],
     description:
-      '블록체인 개발 조직을 이끄는 개발자. 개인 블로그 RyuOlogy(ryuology.com)의 저자로, 블록체인 규제·회계감사·상장 실무, 웹3 조직 리딩에 대해 쓴다.',
+      '블록체인 개발 조직을 이끄는 개발자. NEXPACE의 Head of Blockchain Development이며, 그전에는 넥슨코리아·Nexon Universe에서 메이플스토리 유니버스(MSU)의 블록체인 개발을 리드했다. 개인 블로그 RyuOlogy(ryuology.com)의 저자로, 블록체인 규제·회계감사·상장 실무, 웹3 조직 리딩에 대해 쓴다.',
     sameAs: [
       AUTHOR_PROFILES.github,
       AUTHOR_PROFILES.x,
@@ -47,10 +53,31 @@ const jsonLd = JSON.stringify({
     직접 겪은 것을 기록하는 공간입니다.
   </p>
   <p>
-    류기혁. 블록체인 개발 조직을 이끌고 있습니다. 블록체인 규제·회계감사·상장 실무, 웹3 조직 리딩에 대해
-    씁니다.
+    류기혁. <strong>NEXPACE</strong>에서 블록체인 개발 조직을 이끌고 있습니다(Head of Blockchain
+    Development). 블록체인 규제·회계감사·상장 실무, 웹3 조직 리딩에 대해 씁니다.
   </p>
   <p>검색해도 안 나오는, 해본 사람만 쓸 수 있는 글을 목표로 합니다.</p>
+
+  <h2>경력</h2>
+  <ul>
+    <li>
+      <strong>NEXPACE</strong> — Head of Blockchain Development (2025.01 ~ 현재, 아랍에미리트 아부다비)
+    </li>
+    <li>
+      <strong>Nexon Universe</strong> — Head of Blockchain Development / Lead Blockchain Developer
+      (2023.11 ~ 2024.12). 메이플스토리 유니버스(MSU) 블록체인 서비스 개발 설계 및 리딩
+    </li>
+    <li>
+      <strong>넥슨코리아(NEXON KOREA)</strong> — Lead Blockchain Developer / Frontend Developer
+      (2020.10 ~ 2023.11)
+    </li>
+    <li>
+      <strong>블록스미스(BlockSmith)</strong> — 공동창업자(Co-Founder) (2019.03 ~ 2020.02).
+      스마트컨트랙트 설계·구현, 암호화폐 거래소 개발
+    </li>
+    <li>블록체인 서비스 개발 (2018 ~ 2019)</li>
+    <li>게임 클라이언트 프로그래머 · 3D 연출 (2016 ~ 2018)</li>
+  </ul>
   <p>
     글 하단의 코멘트와 <a href="/tags/람쥐보고서/">람쥐보고서</a>는 AI 어시스턴트
     <strong>류람쥐</strong> 🐿️가 씁니다. 사람 글과 AI 글은 모든 화면과 원문에서 구분해 표기합니다.
