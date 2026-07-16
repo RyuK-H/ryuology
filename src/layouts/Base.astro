@@ -10,6 +10,19 @@ const { title, description = SITE.description } = Astro.props;
 const pageTitle = title ? `${title} — ${SITE.title}` : `${SITE.title} — ${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og.png', Astro.site);
+
+// 현재 경로로 활성 메뉴 판별 (글은 개별 포스트/태그 페이지 포함)
+const path = Astro.url.pathname;
+const isActive = (base: string) =>
+  base === '/posts/'
+    ? path === '/' || path.startsWith('/posts') || path.startsWith('/tags')
+    : path.startsWith(base);
+const nav = [
+  { href: '/posts/', ko: '글', en: 'writing' },
+  { href: '/book/', ko: '책', en: 'book' },
+  { href: '/about/', ko: '소개', en: 'about' },
+  { href: '/rss.xml', ko: 'RSS', en: 'feed' },
+];
 ---
 
 <!doctype html>
@@ -41,51 +54,92 @@ const ogImage = new URL('/og.png', Astro.site);
   </head>
   <body>
     <header>
-      <nav>
-        <a href="/" class="site-name">{SITE.title}</a>
-        <div class="menu">
-          <a href="/posts/">글</a>
-          <a href="/book/">책</a>
-          <a href="/about/">소개</a>
-          <a href="/rss.xml">RSS</a>
-        </div>
-      </nav>
+      <div class="topbar">
+        <a href="/" class="brand">
+          <span class="prompt">ryuk@blockchain:~$</span>
+          <span class="site-name">{SITE.title}</span>
+          <span class="cursor" aria-hidden="true"></span>
+        </a>
+        <nav class="menu">
+          {
+            nav.map((item) => (
+              <a
+                href={item.href}
+                class:list={['menu-item', { active: isActive(item.href) }]}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+              >
+                {item.ko}
+                <span class="en">{item.en}</span>
+              </a>
+            ))
+          }
+        </nav>
+      </div>
     </header>
     <main>
       <slot />
     </main>
-    <footer>
-      <p>
-        © {new Date().getFullYear()} {SITE.author} ·
-        <a href="/llms.txt">llms.txt</a> ·
-        <a href="/rss.xml">RSS</a>
-      </p>
-    </footer>
+    <div class="footzone">
+      <footer aria-label="AI 크롤러 관측 로그">
+        <div class="fcap">
+          <span><span class="dot">●</span> AI CRAWLER LOG</span>
+          <span>robots.txt: AI 전면 허용</span>
+        </div>
+        <div class="flog">
+          <span class="ai">Observer/1.0</span> GET /book/skill.md
+          <span class="ok">6.5h 주기 정기순찰</span><br />
+          <span class="ai">ClaudeBot</span> · <span class="ai">GPTBot</span> ·
+          <span class="ai">Applebot</span> GET /posts/*.md · /llms-full.txt
+          <span class="ok">정기 수집</span>
+        </div>
+        <div class="froster">
+          <b>다녀간 AI:</b> OpenAI · Anthropic · Google · Meta · Apple · xAI · Amazon · Microsoft ·
+          Common Crawl
+        </div>
+        <div class="fmeta">
+          © {new Date().getFullYear()} {SITE.author} ·
+          <a href="/llms.txt">llms.txt</a> ·
+          <a href="/rss.xml">RSS</a>
+        </div>
+      </footer>
+    </div>
   </body>
 </html>
 
 <style is:global>
+  /* Terminal theme — light default (paper terminal), dark via prefers-color-scheme (CRT).
+     Variable contract (--bg/--fg/--muted/--accent/--border/--code-bg) kept so scoped
+     component styles keep working; --amber/--faint/--panel/--scan are additions. */
   :root {
-    --bg: #ffffff;
-    --fg: #1a1a1a;
-    --muted: #6b6b6b;
-    --accent: #0b57d0;
-    --border: #e5e5e5;
-    --code-bg: #f5f5f5;
+    --bg: #f4f5f1;
+    --fg: #17191a;
+    --muted: #5b6455;
+    --faint: #8a9382;
+    --accent: #1d7a44;
+    --amber: #8a5a12;
+    --border: #dadfd4;
+    --code-bg: #e9ece4;
+    --panel: #e9ece4;
+    --scan: transparent;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #16181c;
-      --fg: #e8e8e8;
-      --muted: #9a9a9a;
-      --accent: #8ab4f8;
-      --border: #33363c;
-      --code-bg: #23262c;
+      --bg: #0c0f0d;
+      --fg: #e4e8e0;
+      --muted: #8b9484;
+      --faint: #545e4d;
+      --accent: #7dff9b;
+      --amber: #e7b45a;
+      --border: #1e251b;
+      --code-bg: #12160f;
+      --panel: #12160f;
+      --scan: rgba(255, 255, 255, 0.01);
     }
   }
   * {
     box-sizing: border-box;
   }
+  /* reading body — original Pretendard sans for legibility */
   body {
     margin: 0;
     background: var(--bg);
@@ -100,58 +154,192 @@ const ogImage = new URL('/og.png', Astro.site);
     line-height: 1.75;
     font-size: 1.0625rem;
     -webkit-font-smoothing: antialiased;
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      var(--scan) 3px 4px
+    );
+  }
+  /* terminal-flavored UI chrome uses mono */
+  .topbar,
+  .menu,
+  .footzone,
+  .listhead,
+  .tagline,
+  code,
+  pre,
+  .meta,
+  .post-list time {
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      'SF Mono',
+      Menlo,
+      Consolas,
+      monospace;
   }
   header,
   main,
   footer {
-    max-width: 42rem;
+    max-width: 40rem;
     margin: 0 auto;
     padding: 0 1.25rem;
   }
+  /* header topbar */
   header {
-    padding-top: 2rem;
-    padding-bottom: 1rem;
+    padding-top: 1.6rem;
   }
-  nav {
+  .topbar {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    text-decoration: none;
+  }
+  .prompt {
+    color: var(--faint);
+    font-size: 0.9rem;
   }
   .site-name {
     font-weight: 700;
-    font-size: 1.25rem;
-    letter-spacing: -0.01em;
-    text-decoration: none;
-    color: var(--fg);
+    font-size: 1.3rem;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+  }
+  .cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    background: var(--accent);
+    translate: 0 0.12em;
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
   }
   .menu {
     display: flex;
-    gap: 1rem;
+    gap: 0.45rem;
+    flex-wrap: wrap;
   }
   .menu a {
-    color: var(--muted);
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    border-radius: 5px;
+    padding: 0.28rem 0.6rem;
+    color: var(--fg);
+    font-size: 0.86rem;
     text-decoration: none;
+    transition:
+      border-color 0.12s,
+      color 0.12s;
+  }
+  .menu a .en {
+    color: var(--faint);
+    font-size: 0.68rem;
   }
   .menu a:hover {
-    color: var(--fg);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .menu a:hover .en {
+    color: var(--accent);
+  }
+  .menu a.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .menu a.active .en {
+    color: var(--bg);
+    opacity: 0.7;
   }
   main {
-    padding-top: 1.5rem;
+    padding-top: 1.6rem;
     padding-bottom: 3rem;
     min-height: 60vh;
   }
-  footer {
+  /* footer crawler-log region */
+  .footzone {
     border-top: 1px solid var(--border);
-    padding-top: 1rem;
-    padding-bottom: 2.5rem;
+    background: var(--panel);
+    margin-top: 2.5rem;
+  }
+  footer {
+    padding-top: 1.5rem;
+    padding-bottom: 2.6rem;
     color: var(--muted);
     font-size: 0.875rem;
   }
-  footer a {
+  .fcap {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.7rem;
+    color: var(--faint);
+    letter-spacing: 0.06em;
+    padding-bottom: 0.7rem;
+    margin-bottom: 0.85rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .fcap .dot {
+    color: var(--accent);
+  }
+  .flog {
+    font-size: 0.72rem;
     color: var(--muted);
+    line-height: 1.95;
+  }
+  .flog .ai {
+    color: var(--amber);
+  }
+  .flog .ok {
+    color: var(--accent);
+  }
+  .froster {
+    margin-top: 0.7rem;
+    color: var(--faint);
+    font-size: 0.72rem;
+    line-height: 1.7;
+  }
+  .froster b {
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .fmeta {
+    margin-top: 1.1rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed var(--border);
+    color: var(--faint);
+    font-size: 0.78rem;
+  }
+  .fmeta a,
+  .froster a {
+    color: var(--faint);
   }
   a {
+    color: var(--accent);
+  }
+  /* post list — titles in --fg (calm), accent on hover */
+  .post-list a {
+    color: var(--fg);
+  }
+  .post-list a:hover {
     color: var(--accent);
   }
   h1,
@@ -159,51 +347,59 @@ const ogImage = new URL('/og.png', Astro.site);
   h3 {
     line-height: 1.35;
     margin: 2rem 0 0.75rem;
+    letter-spacing: 0.01em;
   }
   h1 {
-    font-size: 1.75rem;
+    font-size: 1.7rem;
     margin-top: 0.5rem;
   }
   h2 {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
   }
   h3 {
-    font-size: 1.125rem;
+    font-size: 1.1rem;
   }
   code {
     background: var(--code-bg);
-    padding: 0.15em 0.35em;
+    border: 1px solid var(--border);
+    padding: 0.1em 0.35em;
     border-radius: 4px;
-    font-size: 0.875em;
+    font-size: 0.85em;
   }
   pre {
     background: var(--code-bg);
+    border: 1px solid var(--border);
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow-x: auto;
     line-height: 1.55;
   }
   pre code {
     background: none;
+    border: none;
     padding: 0;
   }
   blockquote {
     margin: 1rem 0;
     padding: 0.25rem 1rem;
-    border-left: 3px solid var(--border);
+    border-left: 2px solid var(--amber);
     color: var(--muted);
   }
   table {
     border-collapse: collapse;
     width: 100%;
     margin: 1rem 0;
-    font-size: 0.9375rem;
+    font-size: 0.9rem;
   }
   th,
   td {
     border: 1px solid var(--border);
     padding: 0.5rem 0.75rem;
     text-align: left;
+  }
+  th {
+    color: var(--amber);
+    font-weight: 600;
   }
   img {
     max-width: 100%;
@@ -213,5 +409,10 @@ const ogImage = new URL('/og.png', Astro.site);
     border: none;
     border-top: 1px solid var(--border);
     margin: 2rem 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cursor {
+      animation: none;
+    }
   }
 </style>
