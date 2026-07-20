@@ -68,7 +68,44 @@ const jsonLd = JSON.stringify({
   }
 </Base>
 
+<script>
+  // mermaid 코드 블록 클라이언트 렌더링 — 블록이 있는 페이지에서만 라이브러리를 로드한다
+  const mermaidBlocks = document.querySelectorAll('pre[data-language="mermaid"]');
+  if (mermaidBlocks.length > 0) {
+    const { default: mermaid } = await import('mermaid');
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: dark ? 'dark' : 'neutral',
+      fontFamily: 'inherit',
+    });
+    let n = 0;
+    for (const pre of mermaidBlocks) {
+      const src = pre.textContent ?? '';
+      try {
+        const { svg } = await mermaid.render(`mmd-${n++}`, src);
+        const box = document.createElement('div');
+        box.className = 'mermaid-diagram';
+        box.innerHTML = svg;
+        pre.replaceWith(box);
+      } catch {
+        // 렌더 실패 시 코드 블록 그대로 노출 (raw 소스도 읽을 수 있으므로)
+      }
+    }
+  }
+</script>
+
 <style>
+  :global(.mermaid-diagram) {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  :global(.mermaid-diagram svg) {
+    max-width: 100%;
+    height: auto;
+  }
   .meta {
     color: var(--muted);
     font-size: 0.875rem;
