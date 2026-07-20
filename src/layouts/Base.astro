@@ -19,6 +19,7 @@ const isActive = (base: string) =>
     : path.startsWith(base);
 const nav = [
   { href: '/posts/', ko: '글', en: 'writing' },
+  { href: '/map/', ko: '사고 지도', en: 'map' },
   { href: '/book/', ko: '책', en: 'book' },
   { href: '/about/', ko: '소개', en: 'about' },
   { href: '/rss.xml', ko: 'RSS', en: 'feed' },
@@ -87,10 +88,13 @@ const nav = [
         </div>
         <div class="flog">
           <span class="ai">Observer/1.0</span> GET /book/skill.md
-          <span class="ok">6.5h 주기 정기순찰</span><br />
-          <span class="ai">ClaudeBot</span> · <span class="ai">GPTBot</span> ·
-          <span class="ai">Applebot</span> GET /posts/*.md · /llms-full.txt
-          <span class="ok">정기 수집</span>
+          <span class="ok">6h 주기 정기순찰</span><br />
+          <span class="ai">Amazonbot</span> · <span class="ai">meta-externalagent</span> ·
+          <span class="ai">ClaudeBot</span> · <span class="ai">Googlebot</span> ·
+          <span class="ai">bingbot</span> GET /posts/*.md · /llms.txt · sitemap
+          <span class="ok">최근 72h 291회 방문</span><br />
+          <span class="ai">GoogleOther</span> GET /posts/dialogue-01-continuity.md
+          <span class="ok">대담을 읽고 감</span>
         </div>
         <div class="froster">
           <b>다녀간 AI:</b> OpenAI · Anthropic · Google · Meta · Apple · xAI · Amazon · Microsoft ·

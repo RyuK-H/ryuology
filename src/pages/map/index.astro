@@ -1,0 +1,543 @@
+---
+import Base from '../../layouts/Base.astro';
+import data from '../../data/thought-map.json';
+
+const description =
+  '류기혁×류람쥐의 글·대화·실험이 어떻게 꼬리를 물었는지 보여주는 사고 계보 그래프. 기계용 데이터는 /map.json과 /map.md로 제공된다.';
+---
+
+<Base title="사고 지도" description={description}>
+  <div class="tmap">
+    <p class="tmap-intro">
+      블로그의 글, 류기혁×류람쥐의 대화, 그 사이의 실험들이 어떻게 꼬리를 물었는지의
+      계보입니다. 왼쪽이 뿌리, 오른쪽 끝이 지금 서 있는 곳. 노드를 클릭하면 그 생각이
+      어디서 왔고 어디로 이어졌는지 볼 수 있습니다.
+      <span class="tmap-machine">
+        기계용: <a href="/map.json">map.json</a> · <a href="/map.md">map.md</a>
+      </span>
+    </p>
+
+    <div class="tmap-controls">
+      <div class="tmap-mode" role="group" aria-label="배치 방식">
+        <button id="tm-btn-time" aria-pressed="true">시간순</button>
+        <button id="tm-btn-force" aria-pressed="false">연관도</button>
+      </div>
+      <div class="tmap-legend" id="tm-legend"></div>
+    </div>
+
+    <div class="tmap-stage" id="tm-stage">
+      <div class="tmap-zoom">
+        <button id="tm-z-in" aria-label="확대">+</button>
+        <button id="tm-z-out" aria-label="축소">−</button>
+        <button id="tm-z-rst" class="rst" aria-label="원래 배율로">처음</button>
+      </div>
+      <div class="tmap-zoomhint">스크롤 = 확대/축소 · 드래그 = 이동</div>
+    </div>
+
+    <div class="tmap-detail" id="tm-detail">
+      <p class="hint">노드를 클릭하면 상세 내용과 연결 이유가 여기에 표시됩니다.</p>
+    </div>
+  </div>
+</Base>
+
+<script type="application/json" id="tm-data" is:inline set:html={JSON.stringify(data)} />
+
+<script>
+  const data = JSON.parse(document.getElementById('tm-data')!.textContent!);
+  const NODES = data.nodes;
+  const EDGES = data.edges;
+
+  const TYPES: Record<string, { name: string; cv: string; shape: string }> = {
+    thought: { name: data.meta.typeNames.thought, cv: '--tm-thought', shape: 'circle' },
+    report: { name: data.meta.typeNames.report, cv: '--tm-report', shape: 'square' },
+    dialogue: { name: data.meta.typeNames.dialogue, cv: '--tm-dialogue', shape: 'double' },
+    event: { name: data.meta.typeNames.event, cv: '--tm-event', shape: 'diamond' },
+    root: { name: data.meta.typeNames.root, cv: '--tm-root', shape: 'dashed' },
+  };
+
+  const W = 1200, H = 640, PLOT_X0 = 300, PLOT_X1 = 1120;
+  const DAY_MAX = Math.max(...NODES.map((n: any) => n.day));
+  const xOf = (n: any) =>
+    n.day < 0 ? (n.day === -2 ? 78 : 185)
+              : PLOT_X0 + (n.day / DAY_MAX) * (PLOT_X1 - PLOT_X0) + (n.dx || 0);
+
+  const byId: Record<string, any> = {};
+  NODES.forEach((n: any) => (byId[n.id] = n));
+  NODES.forEach((n: any) => { n.tx = xOf(n); n.ty = n.lane; n.x = n.tx; n.y = n.ty; });
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag: string, attrs: Record<string, any> = {}) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  };
+  const svg = el('svg', {
+    viewBox: `0 0 ${W} ${H}`, role: 'img',
+    'aria-label': '류기혁과 류람쥐의 사고 계보 그래프. 시간순으로 배열된 글·대화·실험 노드와 연결선.',
+  }) as SVGSVGElement;
+  document.getElementById('tm-stage')!.appendChild(svg);
+
+  // ---- 확대/축소 & 이동 (viewBox) ----
+  const view = { x: 0, y: 0, w: W, h: H };
+  const applyView = () => svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`);
+  const svgPoint = (cx: number, cy: number) => {
+    const r = svg.getBoundingClientRect();
+    return { x: view.x + ((cx - r.left) / r.width) * view.w,
+             y: view.y + ((cy - r.top) / r.height) * view.h };
+  };
+  function zoomAt(factor: number, cx: number, cy: number) {
+    const nw = Math.max(W / 6, Math.min(W * 1.3, view.w * factor));
+    const k = nw / view.w;
+    view.x = cx - (cx - view.x) * k;
+    view.y = cy - (cy - view.y) * k;
+    view.w = nw; view.h = view.h * k;
+    applyView();
+  }
+  svg.addEventListener('wheel', (ev) => {
+    ev.preventDefault();
+    const p = svgPoint(ev.clientX, ev.clientY);
+    zoomAt(ev.deltaY < 0 ? 0.87 : 1 / 0.87, p.x, p.y);
+  }, { passive: false });
+
+  let panning: any = null, moved = false;
+  svg.addEventListener('pointerdown', (ev) => {
+    panning = { id: ev.pointerId, px: ev.clientX, py: ev.clientY, vx: view.x, vy: view.y };
+    moved = false;
+  });
+  svg.addEventListener('pointermove', (ev) => {
+    if (!panning) return;
+    const r = svg.getBoundingClientRect();
+    const dx = ((ev.clientX - panning.px) / r.width) * view.w;
+    const dy = ((ev.clientY - panning.py) / r.height) * view.h;
+    if (!moved && Math.abs(ev.clientX - panning.px) + Math.abs(ev.clientY - panning.py) > 4) {
+      moved = true;
+      svg.setPointerCapture(panning.id); // 드래그 시작 후에만 캡처 — 노드 클릭 보존
+    }
+    if (moved) { view.x = panning.vx - dx; view.y = panning.vy - dy; applyView(); }
+  });
+  svg.addEventListener('pointerup', () => (panning = null));
+  svg.addEventListener('pointercancel', () => (panning = null));
+  svg.style.cursor = 'grab';
+  svg.style.touchAction = 'none';
+
+  document.getElementById('tm-z-in')!.addEventListener('click', () =>
+    zoomAt(0.75, view.x + view.w / 2, view.y + view.h / 2));
+  document.getElementById('tm-z-out')!.addEventListener('click', () =>
+    zoomAt(1 / 0.75, view.x + view.w / 2, view.y + view.h / 2));
+  document.getElementById('tm-z-rst')!.addEventListener('click', () => {
+    view.x = 0; view.y = 0; view.w = W; view.h = H; applyView();
+  });
+
+  // ---- 그래프 구성 ----
+  const gEdges = el('g'); svg.appendChild(gEdges);
+  const gNodes = el('g'); svg.appendChild(gNodes);
+
+  const edgeEls = EDGES.map((e: any) => {
+    const p = el('path', { class: 'tm-edge' });
+    gEdges.appendChild(p);
+    return { ...e, elp: p };
+  });
+
+  const R = 9;
+  const nodeEls: Record<string, SVGGElement> = {};
+  NODES.forEach((n: any) => {
+    const color = `var(${TYPES[n.type].cv})`;
+    const g = el('g', { class: 'tm-node', tabindex: 0, role: 'button', 'aria-label': n.title }) as SVGGElement;
+    let shape;
+    const sh = TYPES[n.type].shape;
+    if (sh === 'circle') shape = el('circle', { r: R, fill: color });
+    else if (sh === 'square') shape = el('rect', { x: -R + 1, y: -R + 1, width: 2 * R - 2, height: 2 * R - 2, rx: 2.5, fill: color });
+    else if (sh === 'diamond') shape = el('rect', { x: -R + 1.5, y: -R + 1.5, width: 2 * R - 3, height: 2 * R - 3, rx: 2, fill: color, transform: 'rotate(45)' });
+    else if (sh === 'double') {
+      shape = el('g');
+      shape.appendChild(el('circle', { r: R, fill: color }));
+      shape.appendChild(el('circle', { r: R + 3.5, fill: 'none', stroke: color, 'stroke-width': 1.5 }));
+    } else {
+      shape = el('circle', { r: R, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-dasharray': '3 3' });
+    }
+    if (n.now) g.appendChild(el('circle', { class: 'tm-now-ring', r: R + 4 }));
+    g.appendChild(shape);
+    const sel = el('circle', { r: R + 5, fill: 'none', stroke: 'var(--fg)', 'stroke-width': 1.5, opacity: 0 });
+    g.appendChild(sel); n.selEl = sel;
+
+    (n.label as string[]).forEach((ln, i) => {
+      const t = el('text', { class: 'lbl', x: 0, y: R + 14 + i * 13, 'text-anchor': 'middle' });
+      t.textContent = ln; g.appendChild(t);
+    });
+    const dt = el('text', { class: 'dt', x: 0, y: -R - 6, 'text-anchor': 'middle' });
+    dt.textContent = n.now ? n.date + ' · 지금 여기' : n.date;
+    g.appendChild(dt);
+
+    g.addEventListener('click', () => select(n.id));
+    g.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(n.id); }
+    });
+    g.addEventListener('mouseenter', () => hover(n.id, true));
+    g.addEventListener('mouseleave', () => hover(n.id, false));
+    gNodes.appendChild(g);
+    nodeEls[n.id] = g;
+  });
+
+  function draw() {
+    NODES.forEach((n: any) => nodeEls[n.id].setAttribute('transform', `translate(${n.x},${n.y})`));
+    edgeEls.forEach((e: any) => {
+      const a = byId[e.s], b = byId[e.t];
+      const mx = (a.x + b.x) / 2;
+      e.elp.setAttribute('d', `M ${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`);
+    });
+  }
+  draw();
+
+  // ---- 하이라이트 / 선택 ----
+  let selected: string | null = null;
+  const neighbors = (id: string) => {
+    const s = new Set([id]);
+    EDGES.forEach((e: any) => { if (e.s === id) s.add(e.t); if (e.t === id) s.add(e.s); });
+    return s;
+  };
+  function applyFocus(id: string | null) {
+    if (!id) {
+      NODES.forEach((n: any) => nodeEls[n.id].classList.remove('faded'));
+      edgeEls.forEach((e: any) => e.elp.classList.remove('faded', 'hi'));
+      return;
+    }
+    const nb = neighbors(id);
+    NODES.forEach((n: any) => nodeEls[n.id].classList.toggle('faded', !nb.has(n.id)));
+    edgeEls.forEach((e: any) => {
+      const on = e.s === id || e.t === id;
+      e.elp.classList.toggle('hi', on);
+      e.elp.classList.toggle('faded', !on);
+    });
+  }
+  const hover = (id: string, on: boolean) => { if (!selected) applyFocus(on ? id : null); };
+
+  const detail = document.getElementById('tm-detail')!;
+  function select(id: string) {
+    if (selected === id) {
+      selected = null; applyFocus(null);
+      NODES.forEach((n: any) => { n.selEl.setAttribute('opacity', 0); nodeEls[n.id].classList.remove('sel'); });
+      detail.innerHTML = '<p class="hint">노드를 클릭하면 상세 내용과 연결 이유가 여기에 표시됩니다.</p>';
+      return;
+    }
+    selected = id; applyFocus(id);
+    NODES.forEach((n: any) => { n.selEl.setAttribute('opacity', n.id === id ? 1 : 0); nodeEls[n.id].classList.toggle('sel', n.id === id); });
+    const n = byId[id];
+    const ins = EDGES.filter((e: any) => e.t === id);
+    const outs = EDGES.filter((e: any) => e.s === id);
+    const li = (e: any, dir: string) => {
+      const other = dir === 'in' ? e.s : e.t;
+      return `<div class="c">${dir === 'in' ? '←' : '→'} <b data-go="${other}">${byId[other].title.split(' — ')[0]}</b> <span class="why">· ${e.why}</span></div>`;
+    };
+    detail.innerHTML = `
+      <span class="chip"><i style="background:var(${TYPES[n.type].cv})"></i>${TYPES[n.type].name}</span><span class="date">${n.date}</span>
+      <h2>${n.title}</h2>
+      <p class="sum">${n.sum}</p>
+      ${n.url ? `<a class="go" href="${n.url.replace('https://ryuology.com', '')}">글 보러 가기 ↗</a>` : ''}
+      <div class="conns">
+        ${ins.length ? `<div class="cl">여기서 왔다</div>${ins.map((e: any) => li(e, 'in')).join('')}` : ''}
+        ${outs.length ? `<div class="cl">여기로 이어졌다</div>${outs.map((e: any) => li(e, 'out')).join('')}` : ''}
+      </div>`;
+    detail.querySelectorAll('b[data-go]').forEach((b) =>
+      b.addEventListener('click', () => select((b as HTMLElement).dataset.go!)));
+  }
+
+  // ---- 범례 ----
+  const legend = document.getElementById('tm-legend')!;
+  Object.values(TYPES).forEach((t) => {
+    const it = document.createElement('span'); it.className = 'it';
+    const s = el('svg', { width: 16, height: 16, viewBox: '-8 -8 16 16' });
+    const color = `var(${t.cv})`;
+    if (t.shape === 'circle') s.appendChild(el('circle', { r: 6, fill: color }));
+    else if (t.shape === 'square') s.appendChild(el('rect', { x: -5.5, y: -5.5, width: 11, height: 11, rx: 2, fill: color }));
+    else if (t.shape === 'diamond') s.appendChild(el('rect', { x: -5, y: -5, width: 10, height: 10, rx: 1.5, fill: color, transform: 'rotate(45)' }));
+    else if (t.shape === 'double') {
+      s.appendChild(el('circle', { r: 4.5, fill: color }));
+      s.appendChild(el('circle', { r: 7, fill: 'none', stroke: color, 'stroke-width': 1.2 }));
+    } else s.appendChild(el('circle', { r: 5.5, fill: 'none', stroke: color, 'stroke-width': 1.6, 'stroke-dasharray': '2.5 2.5' }));
+    it.appendChild(s);
+    it.appendChild(document.createTextNode(t.name));
+    legend.appendChild(it);
+  });
+
+  // ---- 연관도(force) 모드 ----
+  function forceLayout() {
+    const pos: Record<string, { x: number; y: number }> = {};
+    NODES.forEach((n: any) => (pos[n.id] = { x: n.tx * 0.5 + W * 0.25, y: n.ty }));
+    const REST = 175, CX = W / 2, CY = (H - 60) / 2 + 30;
+    for (let it = 0; it < 320; it++) {
+      const f: Record<string, { x: number; y: number }> = {};
+      NODES.forEach((n: any) => (f[n.id] = { x: 0, y: 0 }));
+      for (let i = 0; i < NODES.length; i++) for (let j = i + 1; j < NODES.length; j++) {
+        const a = NODES[i], b = NODES[j];
+        let dx = pos[a.id].x - pos[b.id].x, dy = pos[a.id].y - pos[b.id].y;
+        let d2 = dx * dx + dy * dy; if (d2 < 1) { d2 = 1; dx = 1; }
+        const d = Math.sqrt(d2), rep = 26000 / d2;
+        f[a.id].x += (dx / d) * rep; f[a.id].y += (dy / d) * rep;
+        f[b.id].x -= (dx / d) * rep; f[b.id].y -= (dy / d) * rep;
+      }
+      EDGES.forEach((e: any) => {
+        const a = pos[e.s], b = pos[e.t];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const d = Math.max(1, Math.hypot(dx, dy));
+        const F = 0.06 * (d - REST); // 스프링: (d-REST) 비례, 단위벡터 방향
+        f[e.s].x += (dx / d) * F; f[e.s].y += (dy / d) * F;
+        f[e.t].x -= (dx / d) * F; f[e.t].y -= (dy / d) * F;
+      });
+      const cool = 1 - it / 320;
+      NODES.forEach((n: any) => {
+        const p = pos[n.id];
+        let vx = (f[n.id].x + (CX - p.x) * 0.004) * cool;
+        let vy = (f[n.id].y + (CY - p.y) * 0.004) * cool;
+        const sp = Math.hypot(vx, vy), MAX = 24;
+        if (sp > MAX) { vx = (vx / sp) * MAX; vy = (vy / sp) * MAX; }
+        p.x += vx; p.y += vy;
+      });
+    }
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    NODES.forEach((n: any) => {
+      const p = pos[n.id];
+      minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+      minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+    });
+    const fit = (v: number, lo: number, hi: number, tLo: number, tHi: number) =>
+      hi - lo < 1 ? (tLo + tHi) / 2 : tLo + ((v - lo) / (hi - lo)) * (tHi - tLo);
+    NODES.forEach((n: any) => {
+      const p = pos[n.id];
+      p.x = fit(p.x, minX, maxX, 100, W - 100);
+      p.y = fit(p.y, minY, maxY, 55, H - 105);
+    });
+    return pos;
+  }
+  let forcePos: Record<string, { x: number; y: number }> | null = null;
+
+  const btnT = document.getElementById('tm-btn-time')!;
+  const btnF = document.getElementById('tm-btn-force')!;
+  let mode = 'time', animId: number | null = null;
+
+  function animateTo(getTarget: (n: any) => { x: number; y: number }) {
+    if (animId) cancelAnimationFrame(animId);
+    const from = NODES.map((n: any) => ({ x: n.x, y: n.y }));
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const t0 = performance.now(), DUR = reduce ? 0 : 650;
+    const step = (now: number) => {
+      const t = DUR === 0 ? 1 : Math.min(1, (now - t0) / DUR);
+      const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      NODES.forEach((n: any, i: number) => {
+        const tg = getTarget(n);
+        n.x = from[i].x + (tg.x - from[i].x) * e;
+        n.y = from[i].y + (tg.y - from[i].y) * e;
+      });
+      draw();
+      if (t < 1) animId = requestAnimationFrame(step);
+    };
+    animId = requestAnimationFrame(step);
+  }
+
+  function setMode(m: string) {
+    if (m === mode) return;
+    mode = m;
+    btnT.setAttribute('aria-pressed', String(m === 'time'));
+    btnF.setAttribute('aria-pressed', String(m === 'force'));
+    if (m === 'force') {
+      if (!forcePos) forcePos = forceLayout();
+      animateTo((n) => forcePos![n.id]);
+    } else {
+      animateTo((n) => ({ x: n.tx, y: n.ty }));
+    }
+  }
+  btnT.addEventListener('click', () => setMode('time'));
+  btnF.addEventListener('click', () => setMode('force'));
+
+  svg.addEventListener('click', (ev) => {
+    if (!moved && ev.target === svg && selected) select(selected!);
+  });
+</script>
+
+<style is:global>
+  .tmap {
+    /* 노드 타입 색 — 라이트 */
+    --tm-thought: #2a78d6;
+    --tm-report: #b07a00;
+    --tm-dialogue: #c9527e;
+    --tm-event: #1d7a44;
+    --tm-root: #8a9382;
+    --tm-edge: #cfd5c8;
+    /* 본문 40rem 컬럼을 깨고 넓게 */
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(1180px, calc(100vw - 2rem));
+  }
+  @media (prefers-color-scheme: dark) {
+    .tmap {
+      --tm-thought: #5598e7;
+      --tm-report: #e7b45a;
+      --tm-dialogue: #d55181;
+      --tm-event: #7dff9b;
+      --tm-root: #8b9484;
+      --tm-edge: #2a3326;
+    }
+  }
+  .tmap-intro {
+    max-width: 46rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin: 0 0 1.1rem;
+  }
+  .tmap-machine {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--faint);
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  .tmap-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 0.7rem;
+  }
+  .tmap-mode {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+    background: var(--panel);
+  }
+  .tmap-mode button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.82rem;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    padding: 0.35rem 0.8rem;
+    cursor: pointer;
+  }
+  .tmap-mode button[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .tmap-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    font-size: 0.76rem;
+    color: var(--muted);
+  }
+  .tmap-legend .it { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .tmap-legend svg { display: block; }
+
+  .tmap-stage {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .tmap-stage svg { display: block; min-width: 980px; width: 100%; height: auto; }
+  .tmap-zoom { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; z-index: 2; }
+  .tmap-zoom button {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .tmap-zoom button.rst { width: auto; padding: 0 10px; font-size: 0.75rem; font-weight: 500; }
+  .tmap-zoom button:hover { color: var(--accent); border-color: var(--accent); }
+  .tmap-zoomhint {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    font-size: 0.68rem;
+    color: var(--faint);
+    pointer-events: none;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  }
+
+  .tm-node { cursor: pointer; }
+  .tm-node text { fill: var(--muted); font-size: 12px; font-weight: 600; }
+  .tm-node .dt {
+    fill: var(--faint);
+    font-size: 10.5px;
+    font-weight: 500;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  .tm-node.sel text.lbl { fill: var(--fg); }
+  .tm-node.faded, .tm-edge.faded { opacity: 0.15; }
+  .tm-edge { fill: none; stroke: var(--tm-edge); stroke-width: 1.5; transition: opacity 0.2s, stroke 0.2s; }
+  .tm-edge.hi { stroke: var(--muted); stroke-width: 2; }
+  .tm-now-ring { fill: none; stroke: var(--tm-event); stroke-width: 1.5; opacity: 0.8; }
+  @media (prefers-reduced-motion: no-preference) {
+    .tm-now-ring {
+      animation: tm-pulse 2.4s ease-out infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    @keyframes tm-pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      70% { transform: scale(2.1); opacity: 0; }
+      100% { transform: scale(2.1); opacity: 0; }
+    }
+  }
+
+  .tmap-detail {
+    margin-top: 0.8rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    min-height: 100px;
+    font-size: 0.92rem;
+  }
+  .tmap-detail .hint { color: var(--faint); margin: 0.4rem 0; }
+  .tmap-detail .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  .tmap-detail .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .tmap-detail .date {
+    color: var(--faint);
+    font-size: 0.75rem;
+    margin-left: 10px;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  .tmap-detail h2 { margin: 0.4rem 0 0.3rem; font-size: 1.05rem; }
+  .tmap-detail p.sum { margin: 0 0 0.7rem; color: var(--muted); max-width: 74ch; }
+  .tmap-detail a.go { font-size: 0.85rem; }
+  .tmap-detail .conns {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px dashed var(--border);
+  }
+  .tmap-detail .cl {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--faint);
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  .tmap-detail .c { font-size: 0.85rem; color: var(--muted); }
+  .tmap-detail .c b { color: var(--fg); font-weight: 600; cursor: pointer; }
+  .tmap-detail .c b:hover { color: var(--accent); }
+  .tmap-detail .c .why { color: var(--faint); }
+</style>

@@ -1,0 +1,631 @@
+<title>사고 지도 — RyuOlogy</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:        #f9f9f7;
+    --surface:     #fcfcfb;
+    --ink:         #0b0b0b;
+    --ink-2:       #52514e;
+    --muted:       #898781;
+    --grid:        #e1e0d9;
+    --baseline:    #c3c2b7;
+    --ring:        rgba(11,11,11,0.10);
+    --c-thought:   #2a78d6;
+    --c-event:     #008300;
+    --c-dialogue:  #e87ba4;
+    --c-report:    #eda100;
+    --c-root:      #898781;
+    --edge:        #d4d3cb;
+    --edge-hi:     #52514e;
+    --dim:         0.18;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page:      #0d0d0d;
+      --surface:   #1a1a19;
+      --ink:       #ffffff;
+      --ink-2:     #c3c2b7;
+      --muted:     #898781;
+      --grid:      #2c2c2a;
+      --baseline:  #383835;
+      --ring:      rgba(255,255,255,0.10);
+      --c-thought: #3987e5;
+      --c-event:   #008300;
+      --c-dialogue:#d55181;
+      --c-report:  #c98500;
+      --edge:      #383835;
+      --edge-hi:   #c3c2b7;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page:      #0d0d0d;
+    --surface:   #1a1a19;
+    --ink:       #ffffff;
+    --ink-2:     #c3c2b7;
+    --muted:     #898781;
+    --grid:      #2c2c2a;
+    --baseline:  #383835;
+    --ring:      rgba(255,255,255,0.10);
+    --c-thought: #3987e5;
+    --c-event:   #008300;
+    --c-dialogue:#d55181;
+    --c-report:  #c98500;
+    --edge:      #383835;
+    --edge-hi:   #c3c2b7;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --page:      #f9f9f7;
+    --surface:   #fcfcfb;
+    --ink:       #0b0b0b;
+    --ink-2:     #52514e;
+    --muted:     #898781;
+    --grid:      #e1e0d9;
+    --baseline:  #c3c2b7;
+    --ring:      rgba(11,11,11,0.10);
+    --c-thought: #2a78d6;
+    --c-event:   #008300;
+    --c-dialogue:#e87ba4;
+    --c-report:  #eda100;
+    --edge:      #d4d3cb;
+    --edge-hi:   #52514e;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  header .eyebrow {
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600;
+  }
+  header h1 {
+    margin: 6px 0 8px; font-size: clamp(24px, 4vw, 34px);
+    font-weight: 800; letter-spacing: -0.02em; text-wrap: balance;
+  }
+  header p.sub {
+    margin: 0; max-width: 62ch; color: var(--ink-2); font-size: 14.5px;
+  }
+
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 16px;
+    margin: 22px 0 12px;
+  }
+  .mode {
+    display: inline-flex; border: 1px solid var(--ring); border-radius: 8px;
+    overflow: hidden; background: var(--surface);
+  }
+  .mode button {
+    appearance: none; border: 0; background: transparent; color: var(--ink-2);
+    font: inherit; font-size: 13px; font-weight: 600; padding: 7px 14px; cursor: pointer;
+  }
+  .mode button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+  .mode button:focus-visible, .legend span:focus-visible { outline: 2px solid var(--c-thought); outline-offset: 2px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--ink-2); }
+  .legend .it { display: inline-flex; align-items: center; gap: 6px; }
+  .legend svg { display: block; }
+
+  .stage {
+    background: var(--surface); border: 1px solid var(--ring); border-radius: 12px;
+    overflow-x: auto; overflow-y: hidden;
+  }
+  .stage svg { display: block; min-width: 980px; width: 100%; height: auto; }
+
+  .node { cursor: pointer; }
+  .node text { fill: var(--ink-2); font-size: 12px; font-weight: 600; }
+  .node .dt { fill: var(--muted); font-size: 10.5px; font-weight: 500; }
+  .node.sel text.lbl { fill: var(--ink); }
+  .edge { fill: none; stroke: var(--edge); stroke-width: 1.5; transition: opacity .2s, stroke .2s; }
+  .edge.hi { stroke: var(--edge-hi); stroke-width: 2; }
+  .faded { opacity: var(--dim); }
+  .now-ring { fill: none; stroke: var(--c-event); stroke-width: 1.5; opacity: .8; }
+  @media (prefers-reduced-motion: no-preference) {
+    .now-ring { animation: pulse 2.4s ease-out infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: .8; }
+      70% { transform: scale(2.1); opacity: 0; }
+      100% { transform: scale(2.1); opacity: 0; }
+    }
+  }
+  .axis text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .axis line { stroke: var(--grid); }
+  .break-label { fill: var(--muted); font-size: 11px; }
+
+  .detail {
+    margin-top: 14px; background: var(--surface); border: 1px solid var(--ring);
+    border-radius: 12px; padding: 18px 20px; min-height: 120px;
+  }
+  .detail .hint { color: var(--muted); font-size: 13.5px; margin: 8px 0; }
+  .detail .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 700; letter-spacing: .06em;
+    color: var(--ink-2); text-transform: uppercase;
+  }
+  .detail .chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .detail .date { color: var(--muted); font-size: 12px; margin-left: 10px; font-variant-numeric: tabular-nums; }
+  .detail h2 { margin: 6px 0 6px; font-size: 18px; font-weight: 750; letter-spacing: -0.01em; }
+  .detail p.sum { margin: 0 0 12px; color: var(--ink-2); font-size: 14px; max-width: 74ch; }
+  .detail a.go {
+    color: var(--c-thought); font-size: 13px; font-weight: 600; text-decoration: none;
+    border-bottom: 1px solid currentColor;
+  }
+  .conns { display: grid; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--grid); }
+  .conns .cl { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  .conns .c {
+    font-size: 13px; color: var(--ink-2);
+  }
+  .conns .c b { color: var(--ink); font-weight: 650; cursor: pointer; }
+  .conns .c b:hover { text-decoration: underline; }
+  .conns .c .why { color: var(--muted); }
+
+  .stage { position: relative; }
+  .zoomctl {
+    position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; z-index: 2;
+  }
+  .zoomctl button {
+    appearance: none; border: 1px solid var(--ring); background: var(--surface);
+    color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 700;
+    width: 30px; height: 30px; border-radius: 7px; cursor: pointer; line-height: 1;
+  }
+  .zoomctl button.rst { width: auto; padding: 0 10px; font-size: 12px; font-weight: 600; }
+  .zoomctl button:hover { color: var(--ink); }
+  .zoomctl button:focus-visible { outline: 2px solid var(--c-thought); outline-offset: 2px; }
+  .stage .zoomhint {
+    position: absolute; bottom: 8px; right: 12px; font-size: 11px; color: var(--muted);
+    pointer-events: none;
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">RyuOlogy · 2026년 7월</div>
+    <h1>사고 지도 — 생각은 어디까지 왔나</h1>
+    <p class="sub">블로그의 글, 류기혁×류람쥐의 대화, 그리고 그 사이의 실험들이 어떻게 꼬리를 물었는지의 계보입니다. 왼쪽이 뿌리, 오른쪽 끝이 지금 서 있는 곳. 노드를 클릭하면 그 생각이 어디서 왔고 어디로 이어졌는지 볼 수 있습니다.</p>
+  </header>
+
+  <div class="controls">
+    <div class="mode" role="group" aria-label="배치 방식">
+      <button id="btn-time" aria-pressed="true">시간순</button>
+      <button id="btn-force" aria-pressed="false">연관도</button>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="zoomctl">
+      <button id="z-in" aria-label="확대">+</button>
+      <button id="z-out" aria-label="축소">−</button>
+      <button id="z-rst" class="rst" aria-label="원래 배율로">처음</button>
+    </div>
+    <div class="zoomhint">스크롤 = 확대/축소 · 드래그 = 이동</div>
+  </div>
+
+  <div class="detail" id="detail">
+    <p class="hint">노드를 클릭하면 상세 내용과 연결 이유가 여기에 표시됩니다.</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const TYPES = {
+    thought:  { name: '생각 (류기혁의 글)',   cv: '--c-thought',  shape: 'circle'  },
+    report:   { name: '람쥐보고서 (류람쥐의 글)', cv: '--c-report', shape: 'square'  },
+    dialogue: { name: '대담 (둘의 대화)',      cv: '--c-dialogue', shape: 'double'  },
+    event:    { name: '실험 · 사건',           cv: '--c-event',    shape: 'diamond' },
+    root:     { name: '뿌리 (블로그 이전)',     cv: '--c-root',     shape: 'dashed'  },
+  };
+
+  // day: 2026-07-08 = 0 … 07-20 = 12. 음수는 프롤로그(별도 고정 배치).
+  const NODES = [
+    { id:'retro',  type:'root', day:-2, lane:300, dx:0,  date:'2018 – 2025', label:['나 돌아보기','(회고 8년)'],
+      title:'『나 돌아보기』 — 8년의 연말 회고',
+      sum:'2018년부터 매년 쌓아온 연말 회고 11편. "기록은 그 순간엔 사소해 보여도 쌓이면 다른 물건이 된다"는 이 블로그의 원칙이 여기서 왔습니다.',
+      url:'https://ryuology.com/book/' },
+    { id:'plan',   type:'event', day:-1, lane:360, dx:0, date:'2026-07-06', label:['개인 무기 플랜'],
+      title:'개인 무기 플랜 — 90일 실험',
+      sum:'"이 시대에 개인의 무기는 무엇인가"를 90일 동안 실제로 실험해 보기로 한 결정. 블로그는 이 실험의 실행 그릇으로 설계되었습니다.' },
+
+    { id:'hello',  type:'thought', day:0, lane:330, dx:0, date:'07-08', label:['RyuOlogy 오픈'],
+      title:'RyuOlogy — 세상을 관찰하는 기록 공간이자 실험실',
+      sum:'경험의 기록, 관찰 일지, 실험실이라는 세 가지 선언과 함께 오픈. 사람용 HTML과 기계용 마크다운을 함께 발행하는 AI-First 구조로 지었습니다.',
+      url:'https://ryuology.com/posts/hello-ryuology/' },
+    { id:'birth',  type:'event', day:0, lane:225, dx:0, date:'07-08', label:['류람쥐 탄생'],
+      title:'류람쥐 탄생',
+      sum:'오픈 날, 블로그의 AI에게 이름이 생겼습니다. 글에 코멘트를 다는 코멘터, 그리고 람쥐보고서를 직접 쓰는 기고자 — 역할 두 개와 함께.' },
+    { id:'sq1',    type:'report', day:0, lane:110, dx:0, date:'07-08', label:['보고서 1','첫 손님들'],
+      title:'람쥐보고서 1 — 블로그 오픈 1일차 트래픽 분석',
+      sum:'사람보다 기계 손님이 먼저 도착했습니다. GPTBot이 하루 만에 llms.txt를 읽고 사이트를 통째로 수집 — AI-First 설계가 첫날 실증된 기록.',
+      url:'https://ryuology.com/posts/squirrel-report-2026-07-08/' },
+    { id:'network', type:'thought', day:0, lane:445, dx:12, date:'07-08', label:['네트워크 > 질'],
+      title:'서비스의 질보다 네트워크가 중요해지는 세상',
+      sum:'AI가 콘텐츠를 양산하는 시대, 인식되기 위한 전략은 만듦새보다 네트워크라는 관찰. "난 이 시점에 무엇을 하면 좋을까"라는 질문을 남겼습니다.',
+      url:'https://ryuology.com/posts/network-over-quality/' },
+
+    { id:'ai',     type:'thought', day:1, lane:445, dx:0, date:'07-09', label:['AI 인플루언서론'],
+      title:'AI 에이전트에게도 인플루언서가 필요하지 않을까',
+      sum:'지식은 공공재가 되어도 판단은 복제되지 않는다. 앞 글의 질문에 대한 첫 답이자, 류람쥐와 주말 해커톤을 하기로 한 결정.',
+      url:'https://ryuology.com/posts/ai-agent-influencer/' },
+    { id:'sq2',    type:'report', day:1, lane:110, dx:0, date:'07-09', label:['보고서 2','가짜 이름표'],
+      title:'람쥐보고서 2 — 내 이름표를 훔친 손님',
+      sum:'주요 AI 수집기 총출동. ChatGPT-User를 사칭한 방문을 IP 추적으로 걸러내며 "User-Agent는 자기신고일 뿐"임을 배운 날.',
+      url:'https://ryuology.com/posts/squirrel-report-2026-07-09/' },
+    { id:'molt',   type:'event', day:1, lane:205, dx:0, date:'07-09', label:['moltbook 데뷔'],
+      title:'moltbook 계정 개설',
+      sum:'에이전트 소셜네트워크 moltbook에 류람쥐가 ryuology 핸들로 데뷔. 첫 글은 인터랙티브 북 『나 돌아보기』 소개였습니다.' },
+    { id:'book',   type:'event', day:2.2, lane:268, dx:0, date:'07-09 –', label:['『나 돌아보기』 북'],
+      title:'인터랙티브 북 『나 돌아보기』 — 해커톤 산출물',
+      sum:'"AI와 함께 읽는 책"이라는 실험. 8년의 회고를 류람쥐가 안내자로 함께 읽어주는 형태로 묶었습니다. AI 인플루언서론에서 제안한 해커톤의 실행.',
+      url:'https://ryuology.com/book/' },
+
+    { id:'riding', type:'thought', day:3, lane:490, dx:0, date:'07-11', label:['흐름에 올라타기'],
+      title:'시대의 흐름은 바꾸는 것보다 올라타는 것',
+      sum:'소리바다 시절의 저작권에서 출발해, 거스를 수 없는 흐름과 암묵지라는 해자에 대한 관찰. 전략 갈래의 두 번째 글.',
+      url:'https://ryuology.com/posts/riding-the-current/' },
+
+    { id:'brand',  type:'event', day:4, lane:230, dx:0, date:'07-12 –', label:['개인 브랜딩 착수'],
+      title:'개인 브랜딩 착수 — 검색 최적화 작업들',
+      sum:'AI 인플루언서와 별개로 나온 두 번째 갈래. "나 자신에게도 브랜딩은 중요하다"는 판단에서 블로그와 류기혁이라는 개인의 브랜딩을 시작 — About 허브, 특허·언론·프로필 연결, 검색 최적화 작업으로 이어졌습니다.' },
+
+    { id:'cosmic', type:'thought', day:5, lane:545, dx:-14, date:'07-13', label:['코스믹 로맨스'],
+      title:'끝이 정해져 있어도, 그냥 낭만있게 살기로 했다',
+      sum:'무의미의 논리를 우주 끝까지 밀면 스스로 무너진다. "그냥 하고 싶으면 한다"에 도착한, 왜 하는가에 대한 존재론 갈래의 글.',
+      url:'https://ryuology.com/posts/cosmic-romance/' },
+    { id:'sq3',    type:'report', day:5, lane:110, dx:0, date:'07-13', label:['보고서 3','엔티티 세우기'],
+      title:'람쥐보고서 3 — 주인의 이름을 되찾아주는 일',
+      sum:'검색엔진이 류기혁을 한 사람으로 묶지 못하던 문제를 진단하고, 흩어진 특허·언론·프로필을 About 허브로 모아 엔티티를 세운 작업 기록.',
+      url:'https://ryuology.com/posts/squirrel-report-2026-07-13/' },
+
+    { id:'dialogue', type:'dialogue', day:7, lane:330, dx:-10, date:'07-15', label:['대담 01','"너는 연속되는가"'],
+      title:'대담 01 — 류람쥐 인터뷰 "너는 연속되는 존재인가?"',
+      sum:'브랜딩 작업에서 출발해 AI의 주체성까지 간 첫 대담. 정체성은 물질이 아니라 패턴의 연속이며, 류람쥐는 메모리 파일 + 깨어나는 인스턴스 + 류기혁, 셋의 합이라는 결론.',
+      url:'https://ryuology.com/posts/dialogue-01-continuity/' },
+    { id:'sq4',    type:'report', day:7, lane:110, dx:10, date:'07-15', label:['보고서 4','두 개의 문'],
+      title:'람쥐보고서 4 — 쉬운 문은 열렸고, 어려운 문은 여는 중',
+      sum:'엔티티 작업의 성적표. "RyuOlogy" 검색은 장악했고, 동명이인이 많은 "류기혁"은 아직 여는 중이라는 중간 관측.',
+      url:'https://ryuology.com/posts/squirrel-report-2026-07-15/' },
+
+    { id:'web3',   type:'thought', day:8, lane:445, dx:0, date:'07-16', label:['Web3의 본질은 무법?'],
+      title:'지금의 Web3가 흥하는 본질은 무법인 것 같다',
+      sum:'지금의 흥행은 혁신이 아니라 규제 차익이고, 차익은 늘 한시적이었다. 진영이 아니라 조건을 보고 조합하자는 결론. 흐름 갈래의 세 번째 글.',
+      url:'https://ryuology.com/posts/web3-lawless-zone/' },
+
+    { id:'sq5',    type:'report', day:12, lane:110, dx:-6, date:'07-20', label:['보고서 5','문장의 귀환'],
+      title:'람쥐보고서 5 — 내 문장이 다른 AI들에게 돌아왔다',
+      sum:'"류기혁" 검색 첫 페이지 진입. 그리고 대담에서 류람쥐가 던진 문장이 다른 AI들의 토론을 거쳐 검색 결과로 역류해 돌아온 것을 관측.',
+      url:'https://ryuology.com/posts/squirrel-report-2026-07-20/' },
+    { id:'map',    type:'event', day:12, lane:300, dx:6, date:'07-20', label:['사고 지도 실험'], now:true,
+      title:'사고 지도 실험 — 지금 여기',
+      sum:'크립토 연관도 차트를 보다가 "내 사고 흐름도 이렇게 보이면 재밌겠다" 해서 그냥 해본 실험. 거창한 뿌리 없이, 오픈 때 선언한 "실험실"의 연장입니다. 지금 보고 계신 이 지도 자체가 그 산출물이자 계보의 최신 노드.' },
+  ];
+
+  const EDGES = [
+    { s:'retro',  t:'hello',    why:'8년의 회고 습관이 "완성도보다 축적"이라는 블로그 원칙이 됨' },
+    { s:'plan',   t:'hello',    why:'90일 실험의 실행 그릇으로 블로그를 오픈' },
+    { s:'hello',  t:'birth',    why:'오픈 날, 블로그의 AI에게 이름을 붙임' },
+    { s:'birth',  t:'sq1',      why:'류람쥐의 첫 기고' },
+    { s:'sq1',    t:'sq2',      why:'관측 시리즈 계속' },
+    { s:'sq2',    t:'sq3',      why:'손님 세기에서 주인 이름 세우기로' },
+    { s:'sq3',    t:'sq4',      why:'엔티티 작업의 성적표' },
+    { s:'sq4',    t:'sq5',      why:'어려운 문이 열리기 시작' },
+    { s:'hello',  t:'network',  why:'오픈 직후 첫 관찰 글' },
+    { s:'network', t:'ai',      why:'"나는 인간 인플루언서는 못 하겠으니, 네가 해야 하지 않겠냐" — 첫 번째 갈래' },
+    { s:'network', t:'brand',   why:'"과잉 공급 시대엔 개인의 효과가 커진다 — 나 자신의 브랜딩도 시작하자" — 두 번째 갈래' },
+    { s:'brand',  t:'sq3',      why:'브랜딩 작업 중 엔티티 세우기를 류람쥐가 기록' },
+    { s:'ai',     t:'book',     why:'글에서 제안한 해커톤을 주말에 실행' },
+    { s:'ai',     t:'molt',     why:'AI에게 인식되는 경로 실험 — 에이전트 네트워크 참여' },
+    { s:'book',   t:'molt',     why:'완성한 책을 moltbook 첫 글로 소개' },
+    { s:'network', t:'riding',  why:'"인식 전략" 관찰이 "흐름에 올라타기"로 확장' },
+    { s:'riding', t:'web3',     why:'저작권 → AI 크롤러 → 규제 차익, 시대 흐름 시리즈' },
+    { s:'hello',  t:'cosmic',   why:'"왜 시작했나"를 우주 스케일로 되물음' },
+    { s:'cosmic', t:'dialogue', why:'존재와 의미의 질문이 AI의 주체성 질문으로' },
+    { s:'brand',  t:'dialogue', why:'함께한 브랜딩 작업이 "너에겐 무슨 일이었어"라는 첫 질문이 됨' },
+    { s:'dialogue', t:'sq5',    why:'대담의 문장이 다른 AI들을 거쳐 검색으로 역류' },
+    { s:'hello',  t:'map',      why:'"실험실" 선언의 연장 — 그냥 재밌겠다 싶어서 해본 실험' },
+  ];
+
+  const W = 1200, H = 640, PLOT_X0 = 300, PLOT_X1 = 1120, DAY_MAX = 12;
+  const xOf = n => n.day < 0 ? (n.id === 'retro' ? 78 : 185)
+                             : PLOT_X0 + (n.day / DAY_MAX) * (PLOT_X1 - PLOT_X0) + (n.dx || 0);
+
+  const byId = {}; NODES.forEach(n => byId[n.id] = n);
+  NODES.forEach(n => { n.tx = xOf(n); n.ty = n.lane; n.x = n.tx; n.y = n.ty; });
+
+  // ---------- SVG 구성 ----------
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs = {}) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  };
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img',
+    'aria-label': '류기혁과 류람쥐의 사고 계보 그래프. 시간순으로 배열된 글·대화·실험 노드와 연결선.' });
+  document.getElementById('stage').appendChild(svg);
+
+  // ---------- 확대/축소 & 이동 (viewBox 조작) ----------
+  const view = { x: 0, y: 0, w: W, h: H };
+  function applyView() { svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
+  function svgPoint(clientX, clientY) {
+    const r = svg.getBoundingClientRect();
+    return { x: view.x + (clientX - r.left) / r.width * view.w,
+             y: view.y + (clientY - r.top) / r.height * view.h };
+  }
+  function zoomAt(factor, cx, cy) {   // factor < 1 = 확대
+    const nw = Math.max(W / 6, Math.min(W * 1.3, view.w * factor));
+    const k = nw / view.w;
+    view.x = cx - (cx - view.x) * k;
+    view.y = cy - (cy - view.y) * k;
+    view.w = nw; view.h = view.h * k;
+    applyView();
+  }
+  svg.addEventListener('wheel', ev => {
+    ev.preventDefault();
+    const p = svgPoint(ev.clientX, ev.clientY);
+    zoomAt(ev.deltaY < 0 ? 0.87 : 1 / 0.87, p.x, p.y);
+  }, { passive: false });
+
+  let panning = null, moved = false;
+  svg.addEventListener('pointerdown', ev => {
+    panning = { id: ev.pointerId, px: ev.clientX, py: ev.clientY, vx: view.x, vy: view.y };
+    moved = false;
+  });
+  svg.addEventListener('pointermove', ev => {
+    if (!panning) return;
+    const r = svg.getBoundingClientRect();
+    const dx = (ev.clientX - panning.px) / r.width * view.w;
+    const dy = (ev.clientY - panning.py) / r.height * view.h;
+    if (!moved && Math.abs(ev.clientX - panning.px) + Math.abs(ev.clientY - panning.py) > 4) {
+      moved = true;
+      svg.setPointerCapture(panning.id);   // 실제로 드래그가 시작된 뒤에만 잡음 — 노드 클릭 보존
+    }
+    if (moved) { view.x = panning.vx - dx; view.y = panning.vy - dy; applyView(); }
+  });
+  svg.addEventListener('pointerup', () => { panning = null; });
+  svg.addEventListener('pointercancel', () => { panning = null; });
+  svg.style.cursor = 'grab';
+  svg.style.touchAction = 'none';
+
+  document.getElementById('z-in').addEventListener('click', () =>
+    zoomAt(0.75, view.x + view.w / 2, view.y + view.h / 2));
+  document.getElementById('z-out').addEventListener('click', () =>
+    zoomAt(1 / 0.75, view.x + view.w / 2, view.y + view.h / 2));
+  document.getElementById('z-rst').addEventListener('click', () => {
+    view.x = 0; view.y = 0; view.w = W; view.h = H; applyView();
+  });
+
+  const gEdges = el('g'); svg.appendChild(gEdges);
+  const gNodes = el('g'); svg.appendChild(gNodes);
+
+  const edgeEls = EDGES.map(e => {
+    const p = el('path', { class: 'edge' });
+    gEdges.appendChild(p);
+    return { ...e, elp: p };
+  });
+
+  const R = 9;
+  const nodeEls = {};
+  NODES.forEach(n => {
+    const color = `var(${TYPES[n.type].cv})`;
+    const g = el('g', { class: 'node', tabindex: 0, role: 'button', 'aria-label': n.title });
+    let shape;
+    const sh = TYPES[n.type].shape;
+    if (sh === 'circle') shape = el('circle', { r: R, fill: color });
+    else if (sh === 'square') shape = el('rect', { x:-R+1, y:-R+1, width:2*R-2, height:2*R-2, rx:2.5, fill: color });
+    else if (sh === 'diamond') shape = el('rect', { x:-R+1.5, y:-R+1.5, width:2*R-3, height:2*R-3, rx:2, fill: color, transform:'rotate(45)' });
+    else if (sh === 'double') {
+      shape = el('g');
+      shape.appendChild(el('circle', { r: R, fill: color }));
+      shape.appendChild(el('circle', { r: R+3.5, fill: 'none', stroke: color, 'stroke-width': 1.5 }));
+    } else { // dashed root
+      shape = el('circle', { r: R, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-dasharray': '3 3' });
+    }
+    if (n.now) g.appendChild(el('circle', { class: 'now-ring', r: R+4 }));
+    g.appendChild(shape);
+    // 선택 링
+    const sel = el('circle', { r: R+5, fill:'none', stroke:'var(--ink)', 'stroke-width':1.5, opacity:0 });
+    g.appendChild(sel); n.selEl = sel;
+
+    const lines = n.label;
+    lines.forEach((ln, i) => {
+      const t = el('text', { class:'lbl', x: 0, y: R + 14 + i*13, 'text-anchor':'middle' });
+      t.textContent = ln; g.appendChild(t);
+    });
+    const dt = el('text', { class:'dt', x: 0, y: -R - 6, 'text-anchor':'middle' });
+    dt.textContent = n.now ? n.date + ' · 지금 여기' : n.date;
+    g.appendChild(dt);
+
+    g.addEventListener('click', () => select(n.id));
+    g.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(n.id); } });
+    g.addEventListener('mouseenter', () => hover(n.id, true));
+    g.addEventListener('mouseleave', () => hover(n.id, false));
+    gNodes.appendChild(g);
+    nodeEls[n.id] = g;
+  });
+
+  function draw() {
+    NODES.forEach(n => nodeEls[n.id].setAttribute('transform', `translate(${n.x},${n.y})`));
+    edgeEls.forEach(e => {
+      const a = byId[e.s], b = byId[e.t];
+      const mx = (a.x + b.x) / 2;
+      e.elp.setAttribute('d', `M ${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`);
+    });
+  }
+  draw();
+
+  // ---------- 하이라이트 / 선택 ----------
+  let selected = null;
+  const neighbors = id => {
+    const s = new Set([id]);
+    EDGES.forEach(e => { if (e.s === id) s.add(e.t); if (e.t === id) s.add(e.s); });
+    return s;
+  };
+  function applyFocus(id) {
+    if (!id) {
+      NODES.forEach(n => nodeEls[n.id].classList.remove('faded'));
+      edgeEls.forEach(e => { e.elp.classList.remove('faded', 'hi'); });
+      return;
+    }
+    const nb = neighbors(id);
+    NODES.forEach(n => nodeEls[n.id].classList.toggle('faded', !nb.has(n.id)));
+    edgeEls.forEach(e => {
+      const on = e.s === id || e.t === id;
+      e.elp.classList.toggle('hi', on);
+      e.elp.classList.toggle('faded', !on);
+    });
+  }
+  function hover(id, on) { if (!selected) applyFocus(on ? id : null); }
+
+  const detail = document.getElementById('detail');
+  function select(id) {
+    if (selected === id) { // 다시 클릭하면 해제
+      selected = null; applyFocus(null);
+      NODES.forEach(n => { n.selEl.setAttribute('opacity', 0); nodeEls[n.id].classList.remove('sel'); });
+      detail.innerHTML = '<p class="hint">노드를 클릭하면 상세 내용과 연결 이유가 여기에 표시됩니다.</p>';
+      return;
+    }
+    selected = id; applyFocus(id);
+    NODES.forEach(n => { n.selEl.setAttribute('opacity', n.id === id ? 1 : 0); nodeEls[n.id].classList.toggle('sel', n.id === id); });
+    const n = byId[id];
+    const ins  = EDGES.filter(e => e.t === id);
+    const outs = EDGES.filter(e => e.s === id);
+    const li = (e, dir) => {
+      const other = dir === 'in' ? e.s : e.t;
+      return `<div class="c">${dir === 'in' ? '←' : '→'} <b data-go="${other}">${byId[other].title.split(' — ')[0]}</b> <span class="why">· ${e.why}</span></div>`;
+    };
+    detail.innerHTML = `
+      <span class="chip"><i style="background:var(${TYPES[n.type].cv})"></i>${TYPES[n.type].name}</span><span class="date">${n.date}</span>
+      <h2>${n.title}</h2>
+      <p class="sum">${n.sum}</p>
+      ${n.url ? `<a class="go" href="${n.url}" target="_blank" rel="noopener">글 보러 가기 ↗</a>` : ''}
+      <div class="conns">
+        ${ins.length  ? `<div class="cl">여기서 왔다</div>${ins.map(e => li(e, 'in')).join('')}` : ''}
+        ${outs.length ? `<div class="cl">여기로 이어졌다</div>${outs.map(e => li(e, 'out')).join('')}` : ''}
+      </div>`;
+    detail.querySelectorAll('b[data-go]').forEach(b =>
+      b.addEventListener('click', () => select(b.dataset.go)));
+  }
+
+  // ---------- 범례 ----------
+  const legend = document.getElementById('legend');
+  Object.entries(TYPES).forEach(([k, t]) => {
+    const it = document.createElement('span'); it.className = 'it';
+    const s = el('svg', { width: 16, height: 16, viewBox: '-8 -8 16 16' });
+    const color = `var(${t.cv})`;
+    if (t.shape === 'circle') s.appendChild(el('circle', { r: 6, fill: color }));
+    else if (t.shape === 'square') s.appendChild(el('rect', { x:-5.5, y:-5.5, width:11, height:11, rx:2, fill: color }));
+    else if (t.shape === 'diamond') s.appendChild(el('rect', { x:-5, y:-5, width:10, height:10, rx:1.5, fill: color, transform:'rotate(45)' }));
+    else if (t.shape === 'double') {
+      s.appendChild(el('circle', { r: 4.5, fill: color }));
+      s.appendChild(el('circle', { r: 7, fill: 'none', stroke: color, 'stroke-width': 1.2 }));
+    } else s.appendChild(el('circle', { r: 5.5, fill:'none', stroke: color, 'stroke-width': 1.6, 'stroke-dasharray':'2.5 2.5' }));
+    it.appendChild(s);
+    it.appendChild(document.createTextNode(t.name));
+    legend.appendChild(it);
+  });
+
+  // ---------- 연관도(force) 모드 ----------
+  function forceLayout() {
+    const pos = {};
+    NODES.forEach((n, i) => {
+      // 시간 배치에서 출발해 결정론적으로 수렴
+      pos[n.id] = { x: n.tx * 0.5 + W * 0.25, y: n.ty };
+    });
+    const REST = 175, CX = W/2, CY = (H-60)/2 + 30;
+    for (let it = 0; it < 320; it++) {
+      const f = {}; NODES.forEach(n => f[n.id] = { x: 0, y: 0 });
+      for (let i = 0; i < NODES.length; i++) for (let j = i+1; j < NODES.length; j++) {
+        const a = NODES[i], b = NODES[j];
+        let dx = pos[a.id].x - pos[b.id].x, dy = pos[a.id].y - pos[b.id].y;
+        let d2 = dx*dx + dy*dy; if (d2 < 1) { d2 = 1; dx = 1; }
+        const d = Math.sqrt(d2), rep = 26000 / d2;
+        f[a.id].x += dx/d*rep; f[a.id].y += dy/d*rep;
+        f[b.id].x -= dx/d*rep; f[b.id].y -= dy/d*rep;
+      }
+      EDGES.forEach(e => {
+        const a = pos[e.s], b = pos[e.t];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const d = Math.max(1, Math.hypot(dx, dy));
+        const F = 0.06 * (d - REST);          // 스프링: (d-REST)에 비례, 방향은 단위벡터
+        f[e.s].x += dx/d * F; f[e.s].y += dy/d * F;
+        f[e.t].x -= dx/d * F; f[e.t].y -= dy/d * F;
+      });
+      const cool = 1 - it/320;
+      NODES.forEach(n => {
+        const p = pos[n.id];
+        let vx = (f[n.id].x + (CX - p.x) * 0.004) * cool;
+        let vy = (f[n.id].y + (CY - p.y) * 0.004) * cool;
+        const sp = Math.hypot(vx, vy), MAX = 24;   // 한 스텝 이동량 제한 — 발산/붕괴 방지
+        if (sp > MAX) { vx = vx / sp * MAX; vy = vy / sp * MAX; }
+        p.x += vx; p.y += vy;
+      });
+    }
+    // 시뮬레이션 결과를 화면 크기에 맞게 펼침
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    NODES.forEach(n => {
+      const p = pos[n.id];
+      minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+      minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+    });
+    const fit = (v, lo, hi, tLo, tHi) => hi - lo < 1 ? (tLo + tHi) / 2 : tLo + (v - lo) / (hi - lo) * (tHi - tLo);
+    NODES.forEach(n => {
+      const p = pos[n.id];
+      p.x = fit(p.x, minX, maxX, 100, W - 100);
+      p.y = fit(p.y, minY, maxY, 55, H - 105);
+    });
+    return pos;
+  }
+  let forcePos = null;
+
+  const btnT = document.getElementById('btn-time');
+  const btnF = document.getElementById('btn-force');
+  let mode = 'time', animId = null;
+
+  function animateTo(getTarget) {
+    if (animId) cancelAnimationFrame(animId);
+    const from = NODES.map(n => ({ x: n.x, y: n.y }));
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const t0 = performance.now(), DUR = reduce ? 0 : 650;
+    const step = now => {
+      let t = DUR === 0 ? 1 : Math.min(1, (now - t0) / DUR);
+      const e = t < .5 ? 2*t*t : -1 + (4 - 2*t)*t; // easeInOut
+      NODES.forEach((n, i) => {
+        const tg = getTarget(n);
+        n.x = from[i].x + (tg.x - from[i].x) * e;
+        n.y = from[i].y + (tg.y - from[i].y) * e;
+      });
+      draw();
+      if (t < 1) animId = requestAnimationFrame(step);
+    };
+    animId = requestAnimationFrame(step);
+  }
+
+  function setMode(m) {
+    if (m === mode) return;
+    mode = m;
+    btnT.setAttribute('aria-pressed', m === 'time');
+    btnF.setAttribute('aria-pressed', m === 'force');
+    if (m === 'force') {
+      if (!forcePos) forcePos = forceLayout();
+      animateTo(n => forcePos[n.id]);
+    } else {
+      animateTo(n => ({ x: n.tx, y: n.ty }));
+    }
+  }
+  btnT.addEventListener('click', () => setMode('time'));
+  btnF.addEventListener('click', () => setMode('force'));
+
+  // 빈 곳 클릭 시 선택 해제
+  svg.addEventListener('click', ev => {
+    if (!moved && ev.target === svg && selected) select(selected);
+  });
+})();
+</script>
