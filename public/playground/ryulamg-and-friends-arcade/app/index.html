@@ -25,6 +25,7 @@
       #back-btn:active { background: rgba(16, 22, 40, 0.8); }
     </style>
 
+    <script>if (window.self !== window.top) { var b = document.getElementById('back-btn'); if (b) b.style.display = 'none'; }</script>
     <canvas id="game"></canvas>
     <script src="arcade-shim.js"></script>
     <script src="matter.min.js" defer></script>
