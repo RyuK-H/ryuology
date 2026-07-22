@@ -55,7 +55,14 @@ const nav = [
     <slot name="head" />
   </head>
   <body>
-    <div class="sky" aria-hidden="true"><i></i></div>
+    <div class="sky" aria-hidden="true"><i></i><span class="shoot s1"></span><span class="shoot s2"></span></div>
+    <a
+      class="apod-star"
+      href="https://apod.nasa.gov/apod/astropix.html"
+      target="_blank"
+      rel="noopener noreferrer"
+      title="오늘의 우주 · NASA APOD"
+      aria-label="오늘의 우주 사진 보기 — NASA 천문 사진(APOD)"></a>
     <header>
       <div class="topbar">
         <a href="/" class="brand">
@@ -567,6 +574,123 @@ const nav = [
   @media (prefers-reduced-motion: reduce) {
     .sky::after,
     .sky i {
+      animation: none;
+    }
+  }
+
+  /* 별똥별 + APOD 별 — 다크 모드 전용. 별똥별은 가끔 사선으로 떨어지고,
+     APOD 별(앰버)은 넓은 화면 좌측 여백에서만 나타나 누르면 오늘의 우주로 간다. */
+  .apod-star {
+    display: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    .sky .shoot {
+      position: absolute;
+      width: 92px;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, rgba(228, 232, 224, 0) 0%, rgba(228, 232, 224, 0.85) 100%);
+      opacity: 0;
+      transform: rotate(32deg);
+      filter: drop-shadow(0 0 4px rgba(228, 232, 224, 0.5));
+    }
+    .sky .shoot::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: 50%;
+      width: 3px;
+      height: 3px;
+      margin-top: -1.5px;
+      border-radius: 50%;
+      background: rgba(228, 232, 224, 0.98);
+      box-shadow: 0 0 8px 2px rgba(228, 232, 224, 0.55);
+    }
+    .sky .s1 {
+      top: 5vh;
+      left: 8vw;
+      animation: shoot1 11s ease-in 2s infinite;
+    }
+    .sky .s2 {
+      top: 2vh;
+      left: 46vw;
+      animation: shoot2 17s ease-in 9s infinite;
+    }
+    /* APOD 별: 본문 컬럼 밖 좌측 여백이 확보되는 넓은 화면에서만 → 텍스트를 안 가리고 확실히 클릭 가능 */
+    @media (min-width: 56rem) {
+      .apod-star {
+        display: block;
+        position: fixed;
+        left: 7vw;
+        top: 27vh;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: rgba(231, 180, 90, 0.9);
+        box-shadow: 0 0 7px 2px rgba(231, 180, 90, 0.45);
+        z-index: 3;
+        pointer-events: auto;
+        cursor: pointer;
+        text-decoration: none;
+        animation: apodpulse 3.8s ease-in-out infinite;
+      }
+      .apod-star:hover,
+      .apod-star:focus-visible {
+        box-shadow: 0 0 12px 4px rgba(231, 180, 90, 0.85);
+        outline: none;
+      }
+    }
+  }
+  @keyframes shoot1 {
+    0% {
+      transform: translate(0, 0) rotate(32deg);
+      opacity: 0;
+    }
+    3% {
+      opacity: 1;
+    }
+    13% {
+      transform: translate(72vw, 48vh) rotate(32deg);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(72vw, 48vh) rotate(32deg);
+      opacity: 0;
+    }
+  }
+  @keyframes shoot2 {
+    0% {
+      transform: translate(0, 0) rotate(24deg);
+      opacity: 0;
+    }
+    4% {
+      opacity: 1;
+    }
+    14% {
+      transform: translate(44vw, 26vh) rotate(24deg);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(44vw, 26vh) rotate(24deg);
+      opacity: 0;
+    }
+  }
+  @keyframes apodpulse {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.35);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sky .shoot {
+      display: none;
+    }
+    .apod-star {
       animation: none;
     }
   }
