@@ -1,0 +1,114 @@
+---
+import Base from '../../../layouts/Base.astro';
+---
+
+<Base
+  title="류람쥐와 친구들 — 놀이터"
+  description="하늘 위 잔디섬에 동물 10마리를 살려두면 클리어. 단, 동물들에게 자아가 있음. 탭 하나로 즐기는 물리 스태커."
+>
+  <h1>류람쥐와 친구들 🐿️</h1>
+
+  <p class="lead">
+    하늘 위 잔디섬에 동물을 쌓아 <strong>10마리를 살려두면 클리어</strong>합니다. 문제는 이
+    동물들에게 자아가 있다는 것 — 꿈틀거리고, 눈치를 보다 걸어나가고, 가끔은 날아오릅니다.
+  </p>
+
+  <!-- PC: 인앱 임베드 (iframe은 데스크톱 폭에서만 로드) -->
+  <div class="frame-wrap">
+    <iframe
+      id="game-frame"
+      data-src="/playground/ryulamg-and-friends/app/"
+      allow="autoplay; fullscreen"
+      allowfullscreen
+      scrolling="no"
+      title="류람쥐와 친구들"
+    ></iframe>
+  </div>
+
+  <!-- 모바일: 전체화면 플레이로 직행 -->
+  <a class="mobile-play" href="/playground/ryulamg-and-friends/app/">
+    <img src="/playground/ryulamg-and-friends/thumb.png" alt="류람쥐와 친구들" loading="lazy" />
+    <span class="play-btn">▶ 전체화면으로 플레이</span>
+  </a>
+
+  <script is:inline>
+    // 데스크톱에서만 iframe 로드 — 모바일은 전체화면 링크로 가므로 18MB 이중 로드 방지
+    (function () {
+      var f = document.getElementById('game-frame');
+      if (f && window.matchMedia('(min-width: 769px)').matches) f.src = f.dataset.src;
+    })();
+  </script>
+
+  <p class="hint">
+    🖱️ 클릭(탭) = 동물 떨어뜨리기 · ⏱️ 카운트다운이 끝나면 자동 낙하 · 🔊 소리는 우측 상단에서
+    끌 수 있어요
+  </p>
+
+  <p class="credit">
+    Unity WebGL · 외부 에셋 0개(동물·음악 전부 코드 생성) · 클로드가 Unity MCP로 제작 · 2026.07
+  </p>
+
+  <p><a href="/playground/">← 놀이터로 돌아가기</a></p>
+</Base>
+
+<style>
+  .lead {
+    color: var(--muted, #555);
+  }
+  .frame-wrap {
+    margin: 1.4rem 0 0.8rem;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+    background: #8fc9f5;
+    aspect-ratio: 8 / 5;
+    max-height: 78vh;
+  }
+  .frame-wrap iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .mobile-play {
+    display: none;
+    position: relative;
+    margin: 1.4rem 0 0.8rem;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  }
+  .mobile-play img {
+    display: block;
+    width: 100%;
+  }
+  .mobile-play .play-btn {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(12, 18, 36, 0.88);
+    color: #fff;
+    font-weight: 700;
+    padding: 0.8rem 1.4rem;
+    border-radius: 999px;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+  @media (max-width: 768px) {
+    .frame-wrap {
+      display: none;
+    }
+    .mobile-play {
+      display: block;
+    }
+  }
+  .hint {
+    font-size: 0.9rem;
+    color: var(--muted, #666);
+  }
+  .credit {
+    font-size: 0.8rem;
+    color: var(--muted, #999);
+  }
+</style>
