@@ -11,6 +11,17 @@
       html,body{margin:0;padding:0;overflow:hidden;background:#8FC9F5!important;width:100%;height:100%}
       #unity-container{width:100%!important;height:100%!important;position:absolute;left:0;top:0}
       #unity-canvas{width:100%!important;height:100%!important;background:#8FC9F5!important}
+      /* 커스텀 로딩 화면 — 유니티 로고 대신 게임 타이틀 */
+      #unity-loading-bar{background:none}
+      #unity-logo{background:none!important;width:340px!important;height:64px!important}
+      #unity-logo::after{
+        content:'류람쥐와 친구들 🐘';
+        display:flex;align-items:center;justify-content:center;height:100%;
+        font:700 30px/1 system-ui,-apple-system,sans-serif;color:#1a2138;
+      }
+      #unity-progress-bar-empty{background:rgba(16,22,40,0.22)!important;background-image:none!important;border-radius:99px;height:14px!important}
+      #unity-progress-bar-full{background:#5CD48C!important;background-image:none!important;border-radius:99px;height:14px!important}
+    
     </style>
   </head>
   <body>
