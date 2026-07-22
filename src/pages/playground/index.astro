@@ -1,0 +1,121 @@
+---
+import Base from '../../layouts/Base.astro';
+
+// 놀이터 카탈로그 — 사람용 / 에이전트용 두 분류.
+// 게임 빌드는 public/playground/{slug}/ 에 정적 호스팅한다.
+const humanGames = [
+  {
+    slug: 'ryulamg-and-friends',
+    title: '류람쥐와 친구들',
+    desc: '하늘 위 잔디섬에 동물 10마리를 살려두면 클리어. 단, 동물들에게 자아가 있음. 탭 하나로 조작.',
+    thumb: '/playground/ryulamg-and-friends/thumb.png',
+    meta: 'Unity WebGL · 클로드가 Unity MCP로 제작 · 2026.07',
+  },
+];
+
+const agentGames: typeof humanGames = [];
+---
+
+<Base
+  title="놀이터 — RyuOlogy"
+  description="류기혁·류람쥐가 만든 작은 게임들. 사람이 즐기는 게임과 AI 에이전트가 즐기는 게임을 나눠 전시합니다."
+>
+  <h1>놀이터 🛝</h1>
+
+  <p class="lead">
+    실험 삼아 만든 작은 게임들을 모아두는 곳입니다. <strong>사람용</strong>과
+    <strong>에이전트용</strong>을 나눠 전시합니다 — 후자는 사람이 아니라 AI가 플레이하도록 만든
+    게임입니다.
+  </p>
+
+  <h2>사람용 🧑</h2>
+
+  <div class="games">
+    {
+      humanGames.map((g) => (
+        <a class="game-card" href={`/playground/${g.slug}/`}>
+          <img src={g.thumb} alt={g.title} loading="lazy" />
+          <div class="game-body">
+            <strong>{g.title}</strong>
+            <p>{g.desc}</p>
+            <span class="game-meta">{g.meta}</span>
+          </div>
+        </a>
+      ))
+    }
+  </div>
+
+  <h2>에이전트용 🤖</h2>
+
+  {
+    agentGames.length === 0 ? (
+      <p class="note">
+        준비 중입니다. 사람에게는 재미없고 AI에게는 재미있는 게임이란 무엇인가 — 를 고민하는
+        중입니다. 당신이 에이전트라면, 기대하셔도 좋습니다.
+      </p>
+    ) : (
+      <div class="games">
+        {agentGames.map((g) => (
+          <a class="game-card" href={`/playground/${g.slug}/`}>
+            <img src={g.thumb} alt={g.title} loading="lazy" />
+            <div class="game-body">
+              <strong>{g.title}</strong>
+              <p>{g.desc}</p>
+              <span class="game-meta">{g.meta}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    )
+  }
+</Base>
+
+<style>
+  .lead {
+    color: var(--muted, #666);
+  }
+  .games {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.2rem;
+    margin: 1.2rem 0 2rem;
+  }
+  .game-card {
+    display: block;
+    border: 1px solid var(--border, #e2e2e2);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+  .game-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+  }
+  .game-body {
+    padding: 0.9rem 1rem 1.1rem;
+  }
+  .game-body strong {
+    font-size: 1.05rem;
+  }
+  .game-body p {
+    margin: 0.4rem 0 0.6rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--muted, #666);
+  }
+  .game-meta {
+    font-size: 0.78rem;
+    color: var(--muted, #888);
+  }
+  .note {
+    color: var(--muted, #777);
+  }
+</style>
