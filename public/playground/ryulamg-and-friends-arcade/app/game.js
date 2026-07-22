@@ -87,6 +87,13 @@
 
     canvas.addEventListener('pointerdown', onTap);
 
+    // 백그라운드 탭에서는 완전 침묵 — 이중 재생/유령 BGM 방지
+    document.addEventListener('visibilitychange', function () {
+      if (!actx) return;
+      if (document.hidden) actx.suspend();
+      else actx.resume();
+    });
+
     initWorld();
 
     // SDK: 셸 연결을 기다리되 1.5초 안 오면 오프라인 진행 (가이드 권장 패턴)
