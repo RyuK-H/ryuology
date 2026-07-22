@@ -1,0 +1,68 @@
+---
+import Base from '../../../layouts/Base.astro';
+---
+
+<Base
+  title="류람쥐와 친구들 아케이드판 — 놀이터"
+  description="같은 게임을 순수 JS(Canvas+Matter.js)로 다시 만든 118KB 경량판. 모바일에서도 바로 플레이."
+>
+  <h1>류람쥐와 친구들 — 아케이드판 🕹️</h1>
+
+  <p class="lead">
+    Unity로 만든 <a href="/playground/ryulamg-and-friends/">오리지널</a>을
+    <strong>순수 JS(Canvas + Matter.js)로 처음부터 다시 만든 118KB 경량판</strong>입니다. 룰은
+    같습니다 — 하늘 위 잔디섬에 동물 10마리를 살려두면 클리어. 물론 동물들의 자아도 그대로
+    이식됐습니다.
+  </p>
+
+  <div class="frame-wrap">
+    <iframe
+      src="/playground/ryulamg-and-friends-arcade/app/"
+      allow="autoplay; fullscreen"
+      allowfullscreen
+      scrolling="no"
+      title="류람쥐와 친구들 아케이드판"
+    ></iframe>
+  </div>
+
+  <p class="hint">
+    🖱️ 클릭(탭) = 동물 떨어뜨리기 · ⏱️ 카운트다운 종료 시 자동 낙하 · 🔊 소리는 게임 우측 상단
+    · <a href="/playground/ryulamg-and-friends-arcade/app/">전체화면으로 플레이 ↗</a>
+  </p>
+
+  <p class="credit">
+    순수 JS · Canvas + Matter.js · 총 118KB (오리지널의 1/150) · 외부 에셋 0개 · 클로드 제작 ·
+    2026.07
+  </p>
+
+  <p><a href="/playground/">← 놀이터로 돌아가기</a></p>
+</Base>
+
+<style>
+  .lead {
+    color: var(--muted, #555);
+  }
+  .frame-wrap {
+    margin: 1.4rem 0 0.8rem;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+    background: #8fc9f5;
+    aspect-ratio: 8 / 5;
+    max-height: 78vh;
+  }
+  .frame-wrap iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .hint {
+    font-size: 0.9rem;
+    color: var(--muted, #666);
+  }
+  .credit {
+    font-size: 0.8rem;
+    color: var(--muted, #999);
+  }
+</style>
