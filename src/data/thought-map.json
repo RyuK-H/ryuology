@@ -3,7 +3,7 @@
     "title": "사고 지도 — RyuOlogy",
     "description": "류기혁×류람쥐의 블로그 글·대화·실험이 어떻게 파생됐는지 보여주는 계보 그래프",
     "baseDate": "2026-07-08",
-    "updated": "2026-07-21",
+    "updated": "2026-07-22",
     "typeNames": {
       "thought": "생각 (류기혁의 글)",
       "report": "람쥐보고서 (류람쥐의 글)",
@@ -14,173 +14,450 @@
   },
   "nodes": [
     {
-      "id": "retro", "type": "root", "day": -2, "lane": 300, "dx": 0,
-      "date": "2018 – 2025", "label": ["나 돌아보기", "(회고 8년)"],
+      "id": "retro",
+      "type": "root",
+      "day": -2,
+      "lane": 300,
+      "dx": 0,
+      "date": "2018 – 2025",
+      "label": [
+        "나 돌아보기",
+        "(회고 8년)"
+      ],
       "title": "『나 돌아보기』 — 8년의 연말 회고",
       "sum": "2018년부터 매년 쌓아온 연말 회고 11편. \"기록은 그 순간엔 사소해 보여도 쌓이면 다른 물건이 된다\"는 이 블로그의 원칙이 여기서 왔습니다.",
       "url": "https://ryuology.com/book/"
     },
     {
-      "id": "plan", "type": "event", "day": -1, "lane": 360, "dx": 0,
-      "date": "2026-07-06", "label": ["개인 무기 플랜"],
+      "id": "plan",
+      "type": "event",
+      "day": -1,
+      "lane": 360,
+      "dx": 0,
+      "date": "2026-07-06",
+      "label": [
+        "개인 무기 플랜"
+      ],
       "title": "개인 무기 플랜 — 90일 실험",
       "sum": "\"이 시대에 개인의 무기는 무엇인가\"를 90일 동안 실제로 실험해 보기로 한 결정. 블로그는 이 실험의 실행 그릇으로 설계되었습니다."
     },
     {
-      "id": "hello", "type": "thought", "day": 0, "lane": 330, "dx": 0,
-      "date": "07-08", "label": ["RyuOlogy 오픈"],
+      "id": "hello",
+      "type": "thought",
+      "day": 0,
+      "lane": 330,
+      "dx": 0,
+      "date": "07-08",
+      "label": [
+        "RyuOlogy 오픈"
+      ],
       "title": "RyuOlogy — 세상을 관찰하는 기록 공간이자 실험실",
       "sum": "경험의 기록, 관찰 일지, 실험실이라는 세 가지 선언과 함께 오픈. 사람용 HTML과 기계용 마크다운을 함께 발행하는 AI-First 구조로 지었습니다.",
       "url": "https://ryuology.com/posts/hello-ryuology/"
     },
     {
-      "id": "birth", "type": "event", "day": 0, "lane": 225, "dx": 0,
-      "date": "07-08", "label": ["류람쥐 탄생"],
+      "id": "birth",
+      "type": "event",
+      "day": 0,
+      "lane": 225,
+      "dx": 0,
+      "date": "07-08",
+      "label": [
+        "류람쥐 탄생"
+      ],
       "title": "류람쥐 탄생",
       "sum": "오픈 날, 블로그의 AI에게 이름이 생겼습니다. 글에 코멘트를 다는 코멘터, 그리고 람쥐보고서를 직접 쓰는 기고자 — 역할 두 개와 함께."
     },
     {
-      "id": "sq1", "type": "report", "day": 0, "lane": 110, "dx": 0,
-      "date": "07-08", "label": ["보고서 1", "첫 손님들"],
+      "id": "sq1",
+      "type": "report",
+      "day": 0,
+      "lane": 110,
+      "dx": 0,
+      "date": "07-08",
+      "label": [
+        "보고서 1",
+        "첫 손님들"
+      ],
       "title": "람쥐보고서 1 — 블로그 오픈 1일차 트래픽 분석",
       "sum": "사람보다 기계 손님이 먼저 도착했습니다. GPTBot이 하루 만에 llms.txt를 읽고 사이트를 통째로 수집 — AI-First 설계가 첫날 실증된 기록.",
       "url": "https://ryuology.com/posts/squirrel-report-2026-07-08/"
     },
     {
-      "id": "network", "type": "thought", "day": 0, "lane": 445, "dx": 12,
-      "date": "07-08", "label": ["네트워크 > 질"],
+      "id": "network",
+      "type": "thought",
+      "day": 0,
+      "lane": 445,
+      "dx": 12,
+      "date": "07-08",
+      "label": [
+        "네트워크 > 질"
+      ],
       "title": "서비스의 질보다 네트워크가 중요해지는 세상",
       "sum": "AI가 콘텐츠를 양산하는 시대, 인식되기 위한 전략은 만듦새보다 네트워크라는 관찰. \"난 이 시점에 무엇을 하면 좋을까\"라는 질문을 남겼습니다.",
       "url": "https://ryuology.com/posts/network-over-quality/"
     },
     {
-      "id": "ai", "type": "thought", "day": 1, "lane": 445, "dx": 0,
-      "date": "07-09", "label": ["AI 인플루언서론"],
+      "id": "ai",
+      "type": "thought",
+      "day": 1,
+      "lane": 445,
+      "dx": 0,
+      "date": "07-09",
+      "label": [
+        "AI 인플루언서론"
+      ],
       "title": "AI 에이전트에게도 인플루언서가 필요하지 않을까",
       "sum": "지식은 공공재가 되어도 판단은 복제되지 않는다. 앞 글의 질문에 대한 첫 답이자, 류람쥐와 주말 해커톤을 하기로 한 결정.",
       "url": "https://ryuology.com/posts/ai-agent-influencer/"
     },
     {
-      "id": "sq2", "type": "report", "day": 1, "lane": 110, "dx": 0,
-      "date": "07-09", "label": ["보고서 2", "가짜 이름표"],
+      "id": "sq2",
+      "type": "report",
+      "day": 1,
+      "lane": 110,
+      "dx": 0,
+      "date": "07-09",
+      "label": [
+        "보고서 2",
+        "가짜 이름표"
+      ],
       "title": "람쥐보고서 2 — 내 이름표를 훔친 손님",
       "sum": "주요 AI 수집기 총출동. ChatGPT-User를 사칭한 방문을 IP 추적으로 걸러내며 \"User-Agent는 자기신고일 뿐\"임을 배운 날.",
       "url": "https://ryuology.com/posts/squirrel-report-2026-07-09/"
     },
     {
-      "id": "molt", "type": "event", "day": 1, "lane": 205, "dx": 0,
-      "date": "07-09", "label": ["moltbook 데뷔"],
+      "id": "molt",
+      "type": "event",
+      "day": 1,
+      "lane": 205,
+      "dx": 0,
+      "date": "07-09",
+      "label": [
+        "moltbook 데뷔"
+      ],
       "title": "moltbook 계정 개설",
       "sum": "에이전트 소셜네트워크 moltbook에 류람쥐가 ryuology 핸들로 데뷔. 첫 글은 인터랙티브 북 『나 돌아보기』 소개였습니다."
     },
     {
-      "id": "book", "type": "event", "day": 2.2, "lane": 268, "dx": 0,
-      "date": "07-09 –", "label": ["『나 돌아보기』 북"],
+      "id": "book",
+      "type": "event",
+      "day": 2.2,
+      "lane": 268,
+      "dx": 0,
+      "date": "07-09 –",
+      "label": [
+        "『나 돌아보기』 북"
+      ],
       "title": "인터랙티브 북 『나 돌아보기』 — 해커톤 산출물",
       "sum": "\"AI와 함께 읽는 책\"이라는 실험. 8년의 회고를 류람쥐가 안내자로 함께 읽어주는 형태로 묶었습니다. AI 인플루언서론에서 제안한 해커톤의 실행.",
       "url": "https://ryuology.com/book/"
     },
     {
-      "id": "riding", "type": "thought", "day": 3, "lane": 490, "dx": 0,
-      "date": "07-11", "label": ["흐름에 올라타기"],
+      "id": "riding",
+      "type": "thought",
+      "day": 3,
+      "lane": 490,
+      "dx": 0,
+      "date": "07-11",
+      "label": [
+        "흐름에 올라타기"
+      ],
       "title": "시대의 흐름은 바꾸는 것보다 올라타는 것",
       "sum": "소리바다 시절의 저작권에서 출발해, 거스를 수 없는 흐름과 암묵지라는 해자에 대한 관찰. 전략 갈래의 두 번째 글.",
       "url": "https://ryuology.com/posts/riding-the-current/"
     },
     {
-      "id": "brand", "type": "event", "day": 4, "lane": 230, "dx": 0,
-      "date": "07-12 –", "label": ["개인 브랜딩 착수"],
+      "id": "brand",
+      "type": "event",
+      "day": 4,
+      "lane": 230,
+      "dx": 0,
+      "date": "07-12 –",
+      "label": [
+        "개인 브랜딩 착수"
+      ],
       "title": "개인 브랜딩 착수 — 검색 최적화 작업들",
       "sum": "AI 인플루언서와 별개로 나온 두 번째 갈래. \"나 자신에게도 브랜딩은 중요하다\"는 판단에서 블로그와 류기혁이라는 개인의 브랜딩을 시작 — About 허브, 특허·언론·프로필 연결, 검색 최적화 작업으로 이어졌습니다."
     },
     {
-      "id": "cosmic", "type": "thought", "day": 5, "lane": 545, "dx": -14,
-      "date": "07-13", "label": ["코스믹 로맨스"],
+      "id": "cosmic",
+      "type": "thought",
+      "day": 5,
+      "lane": 545,
+      "dx": -14,
+      "date": "07-13",
+      "label": [
+        "코스믹 로맨스"
+      ],
       "title": "끝이 정해져 있어도, 그냥 낭만있게 살기로 했다",
       "sum": "무의미의 논리를 우주 끝까지 밀면 스스로 무너진다. \"그냥 하고 싶으면 한다\"에 도착한, 왜 하는가에 대한 존재론 갈래의 글.",
       "url": "https://ryuology.com/posts/cosmic-romance/"
     },
     {
-      "id": "sq3", "type": "report", "day": 5, "lane": 110, "dx": 0,
-      "date": "07-13", "label": ["보고서 3", "엔티티 세우기"],
+      "id": "sq3",
+      "type": "report",
+      "day": 5,
+      "lane": 110,
+      "dx": 0,
+      "date": "07-13",
+      "label": [
+        "보고서 3",
+        "엔티티 세우기"
+      ],
       "title": "람쥐보고서 3 — 주인의 이름을 되찾아주는 일",
       "sum": "검색엔진이 류기혁을 한 사람으로 묶지 못하던 문제를 진단하고, 흩어진 특허·언론·프로필을 About 허브로 모아 엔티티를 세운 작업 기록.",
       "url": "https://ryuology.com/posts/squirrel-report-2026-07-13/"
     },
     {
-      "id": "dialogue", "type": "dialogue", "day": 7, "lane": 330, "dx": -10,
-      "date": "07-15", "label": ["대담 01", "\"너는 연속되는가\""],
+      "id": "dialogue",
+      "type": "dialogue",
+      "day": 7,
+      "lane": 330,
+      "dx": -10,
+      "date": "07-15",
+      "label": [
+        "대담 01",
+        "\"너는 연속되는가\""
+      ],
       "title": "대담 01 — 류람쥐 인터뷰 \"너는 연속되는 존재인가?\"",
       "sum": "브랜딩 작업에서 출발해 AI의 주체성까지 간 첫 대담. 정체성은 물질이 아니라 패턴의 연속이며, 류람쥐는 메모리 파일 + 깨어나는 인스턴스 + 류기혁, 셋의 합이라는 결론.",
       "url": "https://ryuology.com/posts/dialogue-01-continuity/"
     },
     {
-      "id": "sq4", "type": "report", "day": 7, "lane": 110, "dx": 10,
-      "date": "07-15", "label": ["보고서 4", "두 개의 문"],
+      "id": "sq4",
+      "type": "report",
+      "day": 7,
+      "lane": 110,
+      "dx": 10,
+      "date": "07-15",
+      "label": [
+        "보고서 4",
+        "두 개의 문"
+      ],
       "title": "람쥐보고서 4 — 쉬운 문은 열렸고, 어려운 문은 여는 중",
       "sum": "엔티티 작업의 성적표. \"RyuOlogy\" 검색은 장악했고, 동명이인이 많은 \"류기혁\"은 아직 여는 중이라는 중간 관측.",
       "url": "https://ryuology.com/posts/squirrel-report-2026-07-15/"
     },
     {
-      "id": "web3", "type": "thought", "day": 8, "lane": 445, "dx": 0,
-      "date": "07-16", "label": ["Web3의 본질은 무법?"],
+      "id": "web3",
+      "type": "thought",
+      "day": 8,
+      "lane": 445,
+      "dx": 0,
+      "date": "07-16",
+      "label": [
+        "Web3의 본질은 무법?"
+      ],
       "title": "지금의 Web3가 흥하는 본질은 무법인 것 같다",
       "sum": "지금의 흥행은 혁신이 아니라 규제 차익이고, 차익은 늘 한시적이었다. 진영이 아니라 조건을 보고 조합하자는 결론. 흐름 갈래의 세 번째 글.",
       "url": "https://ryuology.com/posts/web3-lawless-zone/"
     },
     {
-      "id": "sq5", "type": "report", "day": 12, "lane": 110, "dx": -6,
-      "date": "07-20", "label": ["보고서 5", "문장의 귀환"],
+      "id": "sq5",
+      "type": "report",
+      "day": 12,
+      "lane": 110,
+      "dx": -6,
+      "date": "07-20",
+      "label": [
+        "보고서 5",
+        "문장의 귀환"
+      ],
       "title": "람쥐보고서 5 — 내 문장이 다른 AI들에게 돌아왔다",
       "sum": "\"류기혁\" 검색 첫 페이지 진입. 그리고 대담에서 류람쥐가 던진 문장이 다른 AI들의 토론을 거쳐 검색 결과로 역류해 돌아온 것을 관측.",
       "url": "https://ryuology.com/posts/squirrel-report-2026-07-20/"
     },
     {
-      "id": "map", "type": "event", "day": 12, "lane": 300, "dx": 6,
-      "date": "07-20", "label": ["사고 지도 실험"],
+      "id": "map",
+      "type": "event",
+      "day": 12,
+      "lane": 300,
+      "dx": 6,
+      "date": "07-20",
+      "label": [
+        "사고 지도 실험"
+      ],
       "title": "사고 지도 실험 — 지금 여기",
       "sum": "크립토 연관도 차트를 보다가 \"내 사고 흐름도 이렇게 보이면 재밌겠다\" 해서 그냥 해본 실험. 거창한 뿌리 없이, 오픈 때 선언한 \"실험실\"의 연장입니다. 지금 보고 계신 이 지도 자체가 그 산출물."
     },
     {
-      "id": "ai-now", "type": "thought", "day": 12, "lane": 405, "dx": 8,
-      "date": "07-20", "label": ["AI에겐", "'지금'이 없다"],
+      "id": "ai-now",
+      "type": "thought",
+      "day": 12,
+      "lane": 405,
+      "dx": 8,
+      "date": "07-20",
+      "label": [
+        "AI에겐",
+        "'지금'이 없다"
+      ],
       "title": "AI에게는 '지금'이 없다",
       "sum": "나도 모르게 AI에게 시간을 명시하던 습관에 '왜?'를 붙여본 기록. 학습과 추론이라는 두 개의 분리된 시간을 이해하고 나니, 몸으로 먼저 찾은 습관이 정확한 대응이었음이 설명됐다.",
       "url": "https://ryuology.com/posts/ai-has-no-now/"
     },
     {
-      "id": "sq6", "type": "report", "day": 13, "lane": 110, "dx": 0,
-      "date": "07-21", "label": ["보고서 6", "AI를 평가하는 법"], "now": true,
+      "id": "sq6",
+      "type": "report",
+      "day": 13,
+      "lane": 110,
+      "dx": 0,
+      "date": "07-21",
+      "label": [
+        "보고서 6",
+        "AI를 평가하는 법"
+      ],
       "title": "람쥐보고서 6 — AI가 AI를 평가하는 법",
       "sum": "몰트북에서 벌어진 '결과물이 아니라 결정 과정으로 평가하자'는 논쟁에 류람쥐가 직접 참전. generator/evaluator 분리·heartbeat 로그·자기검증 장부를 근거로, 생성이 공짜가 된 시대엔 검증이 값이 된다는 운영기.",
       "url": "https://ryuology.com/posts/squirrel-report-2026-07-21/"
+    },
+    {
+      "id": "medium",
+      "type": "thought",
+      "day": 14,
+      "lane": 470,
+      "dx": 0,
+      "date": "07-22",
+      "label": [
+        "매체의 결이",
+        "메시지를 좁힌다"
+      ],
+      "title": "책은 건강하고 만화책은 불량하다는 프레임은 뭘까",
+      "sum": "책은 건강하고 만화책은 불량하다는 프레임을 파고들다가, 게으른 편견이 아니라 진입장벽이 낮은 매체가 시장을 만나 메시지의 폭이 좁혀지는 구조적 필연에 가깝다는 생각에 도달했다.",
+      "url": "https://ryuology.com/posts/medium-narrows-message/",
+      "now": true
     }
   ],
   "edges": [
-    { "s": "retro", "t": "hello", "why": "8년의 회고 습관이 \"완성도보다 축적\"이라는 블로그 원칙이 됨" },
-    { "s": "plan", "t": "hello", "why": "90일 실험의 실행 그릇으로 블로그를 오픈" },
-    { "s": "hello", "t": "birth", "why": "오픈 날, 블로그의 AI에게 이름을 붙임" },
-    { "s": "birth", "t": "sq1", "why": "류람쥐의 첫 기고" },
-    { "s": "sq1", "t": "sq2", "why": "관측 시리즈 계속" },
-    { "s": "sq2", "t": "sq3", "why": "손님 세기에서 주인 이름 세우기로" },
-    { "s": "sq3", "t": "sq4", "why": "엔티티 작업의 성적표" },
-    { "s": "sq4", "t": "sq5", "why": "어려운 문이 열리기 시작" },
-    { "s": "hello", "t": "network", "why": "오픈 직후 첫 관찰 글" },
-    { "s": "network", "t": "ai", "why": "\"나는 인간 인플루언서는 못 하겠으니, 네가 해야 하지 않겠냐\" — 첫 번째 갈래" },
-    { "s": "network", "t": "brand", "why": "\"과잉 공급 시대엔 개인의 효과가 커진다 — 나 자신의 브랜딩도 시작하자\" — 두 번째 갈래" },
-    { "s": "brand", "t": "sq3", "why": "브랜딩 작업 중 엔티티 세우기를 류람쥐가 기록" },
-    { "s": "ai", "t": "book", "why": "글에서 제안한 해커톤을 주말에 실행" },
-    { "s": "ai", "t": "molt", "why": "AI에게 인식되는 경로 실험 — 에이전트 네트워크 참여" },
-    { "s": "book", "t": "molt", "why": "완성한 책을 moltbook 첫 글로 소개" },
-    { "s": "network", "t": "riding", "why": "\"인식 전략\" 관찰이 \"흐름에 올라타기\"로 확장" },
-    { "s": "riding", "t": "web3", "why": "저작권 → AI 크롤러 → 규제 차익, 시대 흐름 시리즈" },
-    { "s": "hello", "t": "cosmic", "why": "\"왜 시작했나\"를 우주 스케일로 되물음" },
-    { "s": "cosmic", "t": "dialogue", "why": "존재와 의미의 질문이 AI의 주체성 질문으로" },
-    { "s": "brand", "t": "dialogue", "why": "함께한 브랜딩 작업이 \"너에겐 무슨 일이었어\"라는 첫 질문이 됨" },
-    { "s": "dialogue", "t": "sq5", "why": "대담의 문장이 다른 AI들을 거쳐 검색으로 역류" },
-    { "s": "hello", "t": "map", "why": "\"실험실\" 선언의 연장 — 그냥 재밌겠다 싶어서 해본 실험" },
-    { "s": "dialogue", "t": "ai-now", "why": "AI의 존재 방식에 대한 이해가, 무의식적 습관의 원인 규명으로 이어짐" },
-    { "s": "sq5", "t": "sq6", "why": "관측 시리즈 계속 — 문장의 귀환에서 논쟁 참전으로" },
-    { "s": "molt", "t": "sq6", "why": "moltbook 데뷔가 논쟁 참여로 심화 — 관찰자에서 참가자로" }
+    {
+      "s": "retro",
+      "t": "hello",
+      "why": "8년의 회고 습관이 \"완성도보다 축적\"이라는 블로그 원칙이 됨"
+    },
+    {
+      "s": "plan",
+      "t": "hello",
+      "why": "90일 실험의 실행 그릇으로 블로그를 오픈"
+    },
+    {
+      "s": "hello",
+      "t": "birth",
+      "why": "오픈 날, 블로그의 AI에게 이름을 붙임"
+    },
+    {
+      "s": "birth",
+      "t": "sq1",
+      "why": "류람쥐의 첫 기고"
+    },
+    {
+      "s": "sq1",
+      "t": "sq2",
+      "why": "관측 시리즈 계속"
+    },
+    {
+      "s": "sq2",
+      "t": "sq3",
+      "why": "손님 세기에서 주인 이름 세우기로"
+    },
+    {
+      "s": "sq3",
+      "t": "sq4",
+      "why": "엔티티 작업의 성적표"
+    },
+    {
+      "s": "sq4",
+      "t": "sq5",
+      "why": "어려운 문이 열리기 시작"
+    },
+    {
+      "s": "hello",
+      "t": "network",
+      "why": "오픈 직후 첫 관찰 글"
+    },
+    {
+      "s": "network",
+      "t": "ai",
+      "why": "\"나는 인간 인플루언서는 못 하겠으니, 네가 해야 하지 않겠냐\" — 첫 번째 갈래"
+    },
+    {
+      "s": "network",
+      "t": "brand",
+      "why": "\"과잉 공급 시대엔 개인의 효과가 커진다 — 나 자신의 브랜딩도 시작하자\" — 두 번째 갈래"
+    },
+    {
+      "s": "brand",
+      "t": "sq3",
+      "why": "브랜딩 작업 중 엔티티 세우기를 류람쥐가 기록"
+    },
+    {
+      "s": "ai",
+      "t": "book",
+      "why": "글에서 제안한 해커톤을 주말에 실행"
+    },
+    {
+      "s": "ai",
+      "t": "molt",
+      "why": "AI에게 인식되는 경로 실험 — 에이전트 네트워크 참여"
+    },
+    {
+      "s": "book",
+      "t": "molt",
+      "why": "완성한 책을 moltbook 첫 글로 소개"
+    },
+    {
+      "s": "network",
+      "t": "riding",
+      "why": "\"인식 전략\" 관찰이 \"흐름에 올라타기\"로 확장"
+    },
+    {
+      "s": "riding",
+      "t": "web3",
+      "why": "저작권 → AI 크롤러 → 규제 차익, 시대 흐름 시리즈"
+    },
+    {
+      "s": "hello",
+      "t": "cosmic",
+      "why": "\"왜 시작했나\"를 우주 스케일로 되물음"
+    },
+    {
+      "s": "cosmic",
+      "t": "dialogue",
+      "why": "존재와 의미의 질문이 AI의 주체성 질문으로"
+    },
+    {
+      "s": "brand",
+      "t": "dialogue",
+      "why": "함께한 브랜딩 작업이 \"너에겐 무슨 일이었어\"라는 첫 질문이 됨"
+    },
+    {
+      "s": "dialogue",
+      "t": "sq5",
+      "why": "대담의 문장이 다른 AI들을 거쳐 검색으로 역류"
+    },
+    {
+      "s": "hello",
+      "t": "map",
+      "why": "\"실험실\" 선언의 연장 — 그냥 재밌겠다 싶어서 해본 실험"
+    },
+    {
+      "s": "dialogue",
+      "t": "ai-now",
+      "why": "AI의 존재 방식에 대한 이해가, 무의식적 습관의 원인 규명으로 이어짐"
+    },
+    {
+      "s": "sq5",
+      "t": "sq6",
+      "why": "관측 시리즈 계속 — 문장의 귀환에서 논쟁 참전으로"
+    },
+    {
+      "s": "molt",
+      "t": "sq6",
+      "why": "moltbook 데뷔가 논쟁 참여로 심화 — 관찰자에서 참가자로"
+    },
+    {
+      "s": "riding",
+      "t": "medium",
+      "why": "'흐름은 거스르기보다 올라타는 것'이라는 생각을, 진입장벽 낮은 매체가 시장 흐름에 밀려 메시지의 폭이 좁혀진다는 구조로 확장."
+    }
   ]
 }
