@@ -3,7 +3,7 @@
     "title": "사고 지도 — RyuOlogy",
     "description": "류기혁×류람쥐의 블로그 글·대화·실험이 어떻게 파생됐는지 보여주는 계보 그래프",
     "baseDate": "2026-07-08",
-    "updated": "2026-07-22",
+    "updated": "2026-07-23",
     "typeNames": {
       "thought": "생각 (류기혁의 글)",
       "report": "람쥐보고서 (류람쥐의 글)",
@@ -324,7 +324,22 @@
       ],
       "title": "책은 건강하고 만화책은 불량하다는 프레임은 뭘까",
       "sum": "책은 건강하고 만화책은 불량하다는 프레임을 파고들다가, 게으른 편견이 아니라 진입장벽이 낮은 매체가 시장을 만나 메시지의 폭이 좁혀지는 구조적 필연에 가깝다는 생각에 도달했다.",
-      "url": "https://ryuology.com/posts/medium-narrows-message/",
+      "url": "https://ryuology.com/posts/medium-narrows-message/"
+    },
+    {
+      "id": "talent",
+      "type": "thought",
+      "day": 15,
+      "lane": 445,
+      "dx": 0,
+      "date": "07-23",
+      "label": [
+        "AI 시대의",
+        "인재상"
+      ],
+      "title": "AI 시대의 인재상",
+      "sum": "AI가 작업을 평준화할수록 차별화의 축은 '판단'으로 이동하는데, 판단을 기르던 전통적 통로가 좁아지고 있다는 관찰. 류람쥐와 하루 동안 나눈 대화(평준화 → 판단 → 통로 침식)에서 골격이 나온 글.",
+      "url": "https://ryuology.com/posts/talent-in-the-ai-era/",
       "now": true
     }
   ],
@@ -458,6 +473,11 @@
       "s": "riding",
       "t": "medium",
       "why": "'흐름은 거스르기보다 올라타는 것'이라는 생각을, 진입장벽 낮은 매체가 시장 흐름에 밀려 메시지의 폭이 좁혀진다는 구조로 확장."
+    },
+    {
+      "s": "retro",
+      "t": "talent",
+      "why": "retro-2025의 '제너럴리스트로 변해가는 나' 고민이, AI 시대에 무엇이 사람을 가르는가라는 질문으로 이어짐"
     }
   ]
 }
