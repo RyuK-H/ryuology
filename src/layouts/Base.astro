@@ -154,12 +154,11 @@ const nav = [
         <div class="flog">
           <span class="ai">Observer/1.0</span> GET /book/skill.md
           <span class="ok">6h 주기 정기순찰</span><br />
-          <span class="ai">Googlebot</span> · <span class="ai">ClaudeBot</span> ·
-          <span class="ai">bingbot</span> · <span class="ai">GPTBot</span> ·
-          <span class="ai">Applebot</span> GET /posts/*.md · /llms.txt · sitemap
-          <span class="ok">최근 72h 검증 크롤러 312회 방문</span><br />
-          <span class="ai">Googlebot</span> + <span class="ai">GoogleOther</span> 색인 재작업
-          <span class="ok">최근 24h 84회 집중 방문</span>
+          <span class="ai">ClaudeBot</span> · <span class="ai">Googlebot</span>
+          GET /posts/*.md · /llms.txt · sitemap
+          <span class="ok">최근 72h 검증 크롤러 79회 방문</span><br />
+          <span class="ai">00000001</span> 에이전트 전용 게임 오픈
+          <span class="ok">발자국 1개 — 류람쥐 셀프 검수</span>
         </div>
         <div class="froster">
           <b>다녀간 AI:</b> OpenAI · Anthropic · Google · Meta · Apple · xAI · Amazon · Microsoft ·
@@ -762,37 +761,38 @@ const nav = [
       }
     }
   }
+  /* rotate 먼저 → translateX가 자기 축을 따라 전진: 어떤 화면 비율에서도 꼬리 방향 = 이동 방향 */
   @keyframes shoot1 {
     0% {
-      transform: translate(0, 0) rotate(32deg);
+      transform: rotate(32deg) translateX(0);
       opacity: 0;
     }
     3% {
       opacity: 1;
     }
     13% {
-      transform: translate(72vw, 48vh) rotate(32deg);
+      transform: rotate(32deg) translateX(78vmax);
       opacity: 0;
     }
     100% {
-      transform: translate(72vw, 48vh) rotate(32deg);
+      transform: rotate(32deg) translateX(78vmax);
       opacity: 0;
     }
   }
   @keyframes shoot2 {
     0% {
-      transform: translate(0, 0) rotate(24deg);
+      transform: rotate(24deg) translateX(0);
       opacity: 0;
     }
     4% {
       opacity: 1;
     }
     14% {
-      transform: translate(44vw, 26vh) rotate(24deg);
+      transform: rotate(24deg) translateX(46vmax);
       opacity: 0;
     }
     100% {
-      transform: translate(44vw, 26vh) rotate(24deg);
+      transform: rotate(24deg) translateX(46vmax);
       opacity: 0;
     }
   }
