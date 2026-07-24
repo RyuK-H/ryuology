@@ -63,6 +63,58 @@ const nav = [
       rel="noopener noreferrer"
       title="오늘의 우주 · NASA APOD"
       aria-label="오늘의 우주 사진 보기 — NASA 천문 사진(APOD)"></a>
+    <!-- 우측 여백의 초록별 — 누르면 「류기혁 행동 강령」 모달. APOD 별과 대칭. -->
+    <button
+      class="creed-star"
+      type="button"
+      title="류기혁 행동 강령"
+      aria-label="류기혁 행동 강령 열기"
+      aria-haspopup="dialog"></button>
+    <dialog class="creed-dialog" aria-label="류기혁 행동 강령">
+      <article class="creed-body">
+        <p class="creed-kicker">🐿️ 이스터에그</p>
+        <h2 class="creed-title">류기혁 행동 강령</h2>
+        <p class="creed-sub">— 행동 강령 · v2 · 2026-07-24</p>
+        <p class="creed-lead">
+          요약을 견디는 건 다, 추상적 판단이 어떤 구체적 몸(관계·경험)을 입고 나온 것들이다.
+        </p>
+        <ol class="creed-list">
+          <li>
+            <strong>좌표.</strong> 바다는 <em>“판단”</em>이다 — 유일한 뿌리. 요약을 견디는 모든 것은
+            판단이 육화된 것. 관계·실시간으로 드러나면 “그 사람이라서”, 형태·경험으로 드러나면
+            “그 경험이라서”. 둘 다 판단. <b>나는 판단을 판다.</b>
+          </li>
+          <li>
+            <strong>엔진.</strong> 요약은 결론을 뽑고 <em>판단을 버린다.</em> 그래서 판단과 분리되지
+            않는 것만 살아남는다.
+          </li>
+          <li>
+            <strong>판별식.</strong> 무엇을 하든 하나만 묻는다 — <b>“요약당하면 죽는가?”</b> Yes면
+            손대지 않는다. (결론·정보 배달 = 판단이 제거된 것 = 바깥)
+          </li>
+          <li>
+            <strong>도구.</strong> 도구는 판단의 <em>배달</em>을 넓히되, <em>판단하는 행위</em>를
+            대체하지 않는다. 나는 루프 안에 남는다.
+          </li>
+          <li>
+            <strong>원형.</strong> 씨앗은 이미 손에 있다. “판단을 파는 도구”의 프로토타입은 이미 돌고 있다.
+          </li>
+        </ol>
+        <form method="dialog" class="creed-actions">
+          <button class="creed-close" aria-label="닫기">닫기</button>
+        </form>
+      </article>
+    </dialog>
+    <script>
+      const creedStar = document.querySelector('.creed-star');
+      const creedDialog = document.querySelector('.creed-dialog');
+      if (creedStar instanceof HTMLElement && creedDialog instanceof HTMLDialogElement) {
+        creedStar.addEventListener('click', () => creedDialog.showModal());
+        creedDialog.addEventListener('click', (e) => {
+          if (e.target === creedDialog) creedDialog.close();
+        });
+      }
+    </script>
     <header>
       <div class="topbar">
         <a href="/" class="brand">
@@ -583,6 +635,9 @@ const nav = [
   .apod-star {
     display: none;
   }
+  .creed-star {
+    display: none;
+  }
   @media (prefers-color-scheme: dark) {
     .sky .shoot {
       position: absolute;
@@ -639,6 +694,30 @@ const nav = [
         box-shadow: 0 0 12px 4px rgba(231, 180, 90, 0.85);
         outline: none;
       }
+      /* 초록별: APOD 별과 대칭으로 우측 여백에. 누르면 행동 강령 모달. */
+      .creed-star {
+        display: block;
+        position: fixed;
+        right: 7vw;
+        top: 27vh;
+        width: 5px;
+        height: 5px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 7px 2px rgba(125, 255, 155, 0.4);
+        z-index: 3;
+        pointer-events: auto;
+        cursor: pointer;
+        /* apodpulse 재사용 + 다른 주기로 주황별과 박자를 어긋나게 */
+        animation: apodpulse 4.6s ease-in-out infinite;
+      }
+      .creed-star:hover,
+      .creed-star:focus-visible {
+        box-shadow: 0 0 12px 4px rgba(125, 255, 155, 0.85);
+        outline: none;
+      }
     }
   }
   @keyframes shoot1 {
@@ -690,8 +769,88 @@ const nav = [
     .sky .shoot {
       display: none;
     }
-    .apod-star {
+    .apod-star,
+    .creed-star {
       animation: none;
     }
+  }
+
+  /* 행동 강령 모달 — 테마 변수로 라이트/다크 자동 대응 */
+  .creed-dialog {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel);
+    color: var(--fg);
+    padding: 0;
+    max-width: 34rem;
+    width: calc(100vw - 3rem);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  }
+  .creed-dialog::backdrop {
+    background: rgba(4, 6, 4, 0.62);
+    backdrop-filter: blur(2px);
+  }
+  .creed-body {
+    padding: 1.6rem 1.7rem 1.4rem;
+    font-size: 0.95rem;
+    line-height: 1.62;
+  }
+  .creed-kicker {
+    margin: 0 0 0.25rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .creed-title {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--accent);
+  }
+  .creed-sub {
+    margin: 0.15rem 0 1.1rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .creed-lead {
+    margin: 0 0 1.2rem;
+    padding: 0.6rem 0 0.6rem 0.9rem;
+    border-left: 2px solid var(--accent);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--fg);
+  }
+  .creed-list {
+    margin: 0;
+    padding-left: 1.15rem;
+    display: grid;
+    gap: 0.72rem;
+  }
+  .creed-list li {
+    padding-left: 0.15rem;
+  }
+  .creed-list strong {
+    color: var(--accent);
+  }
+  .creed-list em {
+    font-style: normal;
+    border-bottom: 1px dashed var(--faint);
+  }
+  .creed-actions {
+    margin: 1.35rem 0 0;
+    text-align: right;
+  }
+  .creed-close {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    padding: 0.35rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+  }
+  .creed-close:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
 </style>
