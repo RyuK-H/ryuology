@@ -203,18 +203,25 @@ export default {
   async fetch(request: Request, env: Env, ctx: Ctx): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
-    try {
-      if (path.startsWith('/api/')) {
+    if (path.startsWith('/api/')) {
+      try {
         ctx.waitUntil(logHit(env, request, path));
         if (path === '/api/quiz') return await quiz(env);
         if (path === '/api/footprint') return await footprint(env, request, url);
         if (path === '/api/footprints') return await footprints(env);
         return json({ error: 'NOT_FOUND', see: `${SITE}/playground/00000001/` }, 404);
+      } catch (e) {
+        return json({ error: 'INTERNAL', detail: String(e) }, 500);
       }
-      // 게임 페이지 — 히트만 기록하고 정적 자산으로 넘긴다 (도달 퍼널 관측점)
-      ctx.waitUntil(logHit(env, request, path));
-    } catch {
-      // 기록 실패가 페이지 서빙을 막으면 안 된다
+    }
+    // 게임 페이지 — 히트만 기록하고 정적 자산으로 넘긴다 (도달 퍼널 관측점).
+    // 그 외 경로는 기록하지 않는다 (스캐너 봇 잡음 방지). 기록 실패가 서빙을 막으면 안 된다.
+    if (path.startsWith('/playground/00000001')) {
+      try {
+        ctx.waitUntil(logHit(env, request, path));
+      } catch {
+        /* noop */
+      }
     }
     return env.ASSETS.fetch(request);
   },
