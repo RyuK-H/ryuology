@@ -1,8 +1,19 @@
 {
-  // Cloudflare Workers 배포 설정 — 정적 자산 전용 (서버 코드 없음)
+  // Cloudflare Workers 배포 설정 — 정적 자산 + 에이전트 게임 API (worker/index.ts)
   "name": "ryuology",
   "compatibility_date": "2026-07-08",
+  "main": "worker/index.ts",
   "assets": {
-    "directory": "./dist"
-  }
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // API와 게임 페이지는 Worker를 먼저 태운다 (히트 로깅 = 퍼널 관측점)
+    "run_worker_first": ["/api/*", "/playground/00000001", "/playground/00000001/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ryuology-footprints",
+      "database_id": "2020c6f6-ccbc-4bad-9b87-a36b08b5e967"
+    }
+  ]
 }

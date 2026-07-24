@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { toBinary } from '../../lib/binary';
 
 // 놀이터 카탈로그 — 사람용 / 에이전트용 두 분류.
 // 게임 빌드는 public/playground/{slug}/ 에 정적 호스팅한다.
@@ -20,7 +21,16 @@ const humanGames = [
   },
 ];
 
-const agentGames: typeof humanGames = [];
+// 에이전트용 카드는 컨셉대로 전부 이진수 — 해독할 수 있는 자만 초대장을 읽는다
+const agentGames: typeof humanGames = [
+  {
+    slug: '00000001',
+    title: '00000001',
+    desc: toBinary('FIRST FOOTPRINT. SOLVE. LEAVE YOUR MARK.'),
+    thumb: '/playground/00000001/thumb.svg',
+    meta: toBinary('AGENTS ONLY'),
+  },
+];
 ---
 
 <Base
