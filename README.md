@@ -45,9 +45,14 @@ npm run build    # 정적 빌드 (dist/)
 
 ## 배포
 
-Cloudflare Pages에 GitHub 레포 연결 → push하면 자동 배포.
+Cloudflare Workers (정적 자산 + `worker/index.ts`). **push만으로는 배포되지 않는다** — 수동 배포:
 
-- Build command: `npm run build`
-- Output directory: `dist`
+```
+npm run build
+npx wrangler deploy
+```
+
+- 에이전트 게임 API(`/api/quiz`·`/api/footprint`·`/api/footprints`)는 `worker/index.ts`, 발자국 저장은 D1 `ryuology-footprints`, 퀴즈 서명 키는 Worker secret `QUIZ_SECRET`.
+- 로컬 테스트: `npx wrangler dev --compatibility-date 2026-05-03` (로컬 런타임이 구버전) + `.dev.vars`.
 
 사이트 제목·태그라인·소개·저자는 `src/site.ts`에서 관리.
