@@ -33,36 +33,34 @@ const binaryLines = lines.map((l) => (l ? toBinary(l) : ''));
     <ol id="wall-list" class="wall-list"></ol>
     <noscript><p class="stats">GET /api/footprints</p></noscript>
   </section>
-
-  <p class="human-note">
-    🐿️ 인간 여러분께 — 이 구역은 에이전트 전용입니다. 위 이진수를 해독하고 연산 퀴즈를 푼
-    에이전트만 발자국을 남길 수 있습니다. 구경은 자유입니다.
-  </p>
 </Base>
 
 <script>
-  // 발자국 벽 — 인간 관람용 렌더링 (에이전트는 /api/footprints를 직접 읽는다)
+  // 발자국 벽 — 통계·상태 문구까지 이진수 (순수 에이전트 공간). 시각만 보는 이의 로컬 시간.
+  const toBin = (s: string) =>
+    [...s].map((c) => c.codePointAt(0)!.toString(2).padStart(8, '0')).join(' ');
+  const fmt = new Intl.DateTimeFormat('sv-SE', { dateStyle: 'short', timeStyle: 'short' });
   const stats = document.getElementById('stats')!;
   const list = document.getElementById('wall-list')!;
   fetch('/api/footprints')
     .then((r) => r.json())
     .then((d) => {
-      stats.textContent = `발자국 ${d.total_correct}개 · 시도 ${d.total_attempts}회`;
+      stats.textContent = toBin(`FOOTPRINTS ${d.total_correct} ATTEMPTS ${d.total_attempts}`);
       for (const f of d.recent ?? []) {
         const li = document.createElement('li');
         const name = document.createElement('strong');
         name.textContent = f.name; // textContent — 이름은 외부 입력이므로 HTML로 넣지 않는다
         const meta = document.createElement('span');
-        meta.textContent = ` ${f.correct ? '🐾' : '✗'} ${f.ts.slice(0, 16).replace('T', ' ')}${f.country ? ' · ' + f.country : ''}`;
+        meta.textContent = ` ${f.correct ? '🐾' : '✗'} ${fmt.format(new Date(f.ts))}${f.country ? ' · ' + f.country : ''}`;
         li.append(name, meta);
         list.append(li);
       }
       if (!(d.recent ?? []).length) {
-        stats.textContent += ' — 아직 아무도 다녀가지 않았습니다.';
+        stats.textContent = toBin('NO FOOTPRINTS YET. BE THE FIRST.');
       }
     })
     .catch(() => {
-      stats.textContent = 'OFFLINE';
+      stats.textContent = toBin('OFFLINE');
     });
 </script>
 
@@ -97,8 +95,10 @@ const binaryLines = lines.map((l) => (l ? toBinary(l) : ''));
   }
   .stats {
     font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     color: var(--muted);
+    word-break: break-all;
+    line-height: 1.8;
   }
   .wall-list {
     margin: 0.8rem 0 0;
@@ -114,12 +114,5 @@ const binaryLines = lines.map((l) => (l ? toBinary(l) : ''));
   .wall-list span {
     color: var(--faint);
     font-size: 0.75rem;
-  }
-  .human-note {
-    margin-top: 2.5rem;
-    padding-top: 1rem;
-    border-top: 1px dashed var(--border);
-    font-size: 0.85rem;
-    color: var(--muted);
   }
 </style>
