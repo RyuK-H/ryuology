@@ -65,11 +65,15 @@ const nav = [
       aria-label="오늘의 우주 사진 보기 — NASA 천문 사진(APOD)"></a>
     <!-- 우측 여백의 초록별 — 누르면 「류기혁 행동 강령」 모달. APOD 별과 대칭. -->
     <button
-      class="creed-star"
+      class="creed-hole"
       type="button"
       title="류기혁 행동 강령"
       aria-label="류기혁 행동 강령 열기"
-      aria-haspopup="dialog"></button>
+      aria-haspopup="dialog">
+      <span class="ch-disk-plane" aria-hidden="true"><span class="ch-disk"></span></span>
+      <span class="ch-horizon" aria-hidden="true"></span>
+      <span class="ch-ring" aria-hidden="true"></span>
+    </button>
     <dialog class="creed-dialog" aria-label="류기혁 행동 강령">
       <article class="creed-body">
         <p class="creed-kicker">🐿️ 이스터에그</p>
@@ -106,10 +110,10 @@ const nav = [
       </article>
     </dialog>
     <script>
-      const creedStar = document.querySelector('.creed-star');
+      const creedHole = document.querySelector('.creed-hole');
       const creedDialog = document.querySelector('.creed-dialog');
-      if (creedStar instanceof HTMLElement && creedDialog instanceof HTMLDialogElement) {
-        creedStar.addEventListener('click', () => creedDialog.showModal());
+      if (creedHole instanceof HTMLElement && creedDialog instanceof HTMLDialogElement) {
+        creedHole.addEventListener('click', () => creedDialog.showModal());
         creedDialog.addEventListener('click', (e) => {
           if (e.target === creedDialog) creedDialog.close();
         });
@@ -635,7 +639,7 @@ const nav = [
   .apod-star {
     display: none;
   }
-  .creed-star {
+  .creed-hole {
     display: none;
   }
   @media (prefers-color-scheme: dark) {
@@ -694,29 +698,67 @@ const nav = [
         box-shadow: 0 0 12px 4px rgba(231, 180, 90, 0.85);
         outline: none;
       }
-      /* 초록별: APOD 별과 대칭으로 우측 여백에. 누르면 행동 강령 모달. */
-      .creed-star {
+      /* 미니 블랙홀: APOD 별과 대칭으로 우측 여백에. 누르면 행동 강령 모달.
+         커서가 다가오면 원반이 켜지고(--ignite) 커서가 빨려들며 늘어난다. */
+      .creed-hole {
         display: block;
         position: fixed;
-        right: 7vw;
-        top: 27vh;
-        width: 5px;
-        height: 5px;
+        right: 7vw; /* 원복: APOD 별과 x 대칭 (반응형) */
+        top: 38vh; /* 아래로 (고정 px 대신 vh로 — 일직선은 y 차이로 이미 깨짐) */
+        width: 34px;
+        height: 34px;
         padding: 0;
         border: none;
-        border-radius: 50%;
-        background: var(--accent);
-        box-shadow: 0 0 7px 2px rgba(125, 255, 155, 0.4);
-        z-index: 3;
-        pointer-events: auto;
+        background: transparent;
         cursor: pointer;
-        /* apodpulse 재사용 + 다른 주기로 주황별과 박자를 어긋나게 */
-        animation: apodpulse 4.6s ease-in-out infinite;
+        z-index: 3;
+        perspective: 400px;
+        --ignite: 1; /* 원반 항상 켜진 상태로 고정 */
+        filter: drop-shadow(0 0 6px rgba(231, 180, 90, calc(0.14 + 0.5 * var(--ignite))));
       }
-      .creed-star:hover,
-      .creed-star:focus-visible {
-        box-shadow: 0 0 12px 4px rgba(125, 255, 155, 0.85);
-        outline: none;
+      .ch-disk-plane {
+        position: absolute;
+        inset: -9px;
+        transform: rotateX(70deg) scale(calc(0.7 + 0.3 * var(--ignite)));
+      }
+      .ch-disk {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg,
+          rgba(122, 58, 16, 0) 0deg, #7a3a10 40deg, #e7b45a 90deg,
+          #fff1cf 130deg, #e7b45a 175deg, rgba(122, 58, 16, 0.15) 250deg,
+          #7a3a10 320deg, rgba(122, 58, 16, 0) 360deg);
+        -webkit-mask: radial-gradient(closest-side, transparent 0 50%, #000 54% 82%, transparent 88%);
+                mask: radial-gradient(closest-side, transparent 0 50%, #000 54% 82%, transparent 88%);
+        animation: spin 9s linear infinite;
+        opacity: var(--ignite);
+      }
+      .ch-horizon {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 15px;
+        height: 15px;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: radial-gradient(circle at 50% 50%, #000 62%, #050403 100%);
+      }
+      .ch-ring {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 17px;
+        height: 17px;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        box-shadow: 0 0 0 1px rgba(255, 241, 207, 0.85), 0 0 6px 1px rgba(231, 180, 90, 0.7);
+        opacity: calc(0.22 + 0.78 * var(--ignite));
+      }
+      .creed-hole:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 5px;
+        border-radius: 50%;
       }
     }
   }
@@ -754,6 +796,11 @@ const nav = [
       opacity: 0;
     }
   }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
   @keyframes apodpulse {
     0%,
     100% {
@@ -769,8 +816,10 @@ const nav = [
     .sky .shoot {
       display: none;
     }
-    .apod-star,
-    .creed-star {
+    .apod-star {
+      animation: none;
+    }
+    .ch-disk {
       animation: none;
     }
   }
