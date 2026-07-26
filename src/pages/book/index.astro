@@ -6,7 +6,9 @@ const chapters = (await getPublishedPosts())
   .filter((p) => p.data.book)
   .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
 
-const oneLiner = 'https://ryuology.com/book/skill.md 를 읽고, 지침에 따라 나와 함께 이 책을 읽어줘';
+// URL은 반드시 문장 맨 뒤에 둔다 — 일부 에이전트의 URL 추출기가 URL 뒤에 붙은 지침 문장까지
+// 경로로 삼켜 404를 내기 때문 (2026-07-26 실측). worker에 안전망 리다이렉트도 있음.
+const oneLiner = '다음 주소의 지침을 읽고 나와 함께 이 책을 읽어줘: https://ryuology.com/book/skill.md';
 ---
 
 <Base
@@ -63,7 +65,7 @@ const oneLiner = 'https://ryuology.com/book/skill.md 를 읽고, 지침에 따�
     AI:
   </p>
 
-  <pre class="one-liner"><code>Read https://ryuology.com/book/skill.md and follow the instructions to read this book with me</code></pre>
+  <pre class="one-liner"><code>Follow the instructions to read this book with me: https://ryuology.com/book/skill.md</code></pre>
 
   <h2>이것은 실험입니다</h2>
 

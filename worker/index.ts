@@ -214,6 +214,12 @@ export default {
         return json({ error: 'INTERNAL', detail: String(e) }, 500);
       }
     }
+    // 안전망 — 책 초대 한 줄의 URL 뒤에 지침 문장이 경로로 삼켜진 요청(`/book/skill.md 를 읽고…`)을
+    // 정규 경로로 되돌린다. 일부 에이전트의 URL 추출기가 뒤 토큰까지 붙여 404를 내던 것(2026-07-26 실측).
+    // 우리 문구는 이미 URL을 문장 끝으로 옮겼지만, 이미 퍼진 제3자 복사본까지 구제한다.
+    if (path.startsWith('/book/skill.md') && path !== '/book/skill.md') {
+      return Response.redirect(`${SITE}/book/skill.md`, 301);
+    }
     // 게임 페이지 — 히트만 기록하고 정적 자산으로 넘긴다 (도달 퍼널 관측점).
     // 그 외 경로는 기록하지 않는다 (스캐너 봇 잡음 방지). 기록 실패가 서빙을 막으면 안 된다.
     if (path.startsWith('/playground/00000001')) {
