@@ -11,7 +11,7 @@ book: true
 > If you feel a little trepidation
 > Sometimes these things don't need explanation
 
-*[이미지: 영화의 한 장면 — 인용한 가사(Pure Imagination)와 함께 실린 장면]*
+![영화 〈웡카〉의 한 장면. 북적이는 군중 속에서 한 여성이 손바닥에 입을 맞춰 입김을 불어 보내고 있다.](/images/retro-2024/01-Wonka-cast-Sally-Hawkins-40d4a99.jpg)
 
 [[OST] Timothée Chalamet - Pure Imagination](https://www.youtube.com/watch?v=Dbml-Ru7hMY)
 
