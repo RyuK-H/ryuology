@@ -1,55 +1,9 @@
 ---
 import Base from '../../layouts/Base.astro';
-import PostList from '../../components/PostList.astro';
+import PostBrowser from '../../components/PostBrowser.astro';
 import { getPublishedPosts } from '../../lib/posts';
-import { AUTHOR_EMOJI } from '../../site';
 
 const posts = await getPublishedPosts();
-
-const HUMAN_AUTHOR = '류기혁';
-
-// 칩은 손으로 관리하는 목록이 아니라 규칙으로 뽑는다 — 글 쓸 때마다 이 파일을 고치지 않기 위해서.
-// 규칙: 2편 이상인 태그만 칩이 된다. 1편짜리 태그는 눌러도 그 글 하나뿐이라 필터 구실을 못 하고,
-// 전부 늘어놓으면 칩 줄만 길어져 정작 유의미한 분류가 묻힌다.
-// 새 태그는 두 번째 글이 붙는 순간 스스로 칩이 된다. 저자 축(류기혁/류람쥐)은 태그 축과 겹쳐서 두지 않는다.
-const MIN_POSTS_FOR_CHIP = 2;
-
-const tagCounts = new Map<string, number>();
-for (const post of posts) {
-  for (const tag of post.data.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-}
-
-// 기본 저자가 아닌 사람이 전담하는 태그에만 이모지를 붙인다 (람쥐보고서 → 🐿️).
-// 대부분의 태그가 류기혁 단독이라, 단독 여부만 보면 모든 칩에 이모지가 붙어 표식 기능을 잃는다.
-const tagEmoji = (tag: string): string => {
-  const authors = new Set(posts.filter((p) => p.data.tags.includes(tag)).map((p) => p.data.author));
-  if (authors.size !== 1) return '';
-  const [author] = [...authors];
-  return author === HUMAN_AUTHOR ? '' : (AUTHOR_EMOJI[author] ?? '');
-};
-
-const chips = [
-  { label: '전체', count: posts.length, href: '/posts/', filter: 'all' },
-  ...[...tagCounts.entries()]
-    .filter(([, count]) => count >= MIN_POSTS_FOR_CHIP)
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([tag, count]) => ({
-      label: `${tagEmoji(tag)} #${tag}`.trim(),
-      count,
-      href: `/tags/${tag}/`,
-      filter: `tag:${tag}`,
-    })),
-];
-
-// 연도 구분선 — 눈금이 도중에 바뀌는 걸 숨기지 않고 드러낸다.
-// 2026년 7월에 24편이 몰려 있고 그 앞은 1년에 한 편꼴이라는 사실 자체가 정보다.
-const byYear: { year: number; posts: typeof posts }[] = [];
-for (const post of posts) {
-  const year = post.data.pubDate.getFullYear();
-  const last = byYear[byYear.length - 1];
-  if (last && last.year === year) last.posts.push(post);
-  else byYear.push({ year, posts: [post] });
-}
 ---
 
 <Base title="글">
@@ -57,82 +11,8 @@ for (const post of posts) {
     <h1>글</h1>
     <span class="count" data-count>{posts.length}편</span>
   </div>
-
-  <nav class="chips" aria-label="글 필터">
-    {
-      chips.map((chip) => (
-        <a href={chip.href} data-filter={chip.filter} class:list={['chip', { on: chip.filter === 'all' }]}>
-          {chip.label} <span class="n">{chip.count}</span>
-        </a>
-      ))
-    }
-  </nav>
-
-  {
-    byYear.map((group) => (
-      <section class="year" data-year={group.year}>
-        <h2>{group.year}</h2>
-        <PostList posts={group.posts} hideYear />
-      </section>
-    ))
-  }
-
-  <p class="empty" data-empty hidden>이 분류에 해당하는 글이 없습니다.</p>
+  <PostBrowser posts={posts} />
 </Base>
-
-<script>
-  // 칩은 진짜 링크다. JS가 있으면 페이지 이동 없이 그 자리에서 거르고, 없으면 링크로 동작한다.
-  const chips = [...document.querySelectorAll<HTMLAnchorElement>('.chip')];
-  const sections = [...document.querySelectorAll<HTMLElement>('.year')];
-  const countEl = document.querySelector<HTMLElement>('[data-count]');
-  const emptyEl = document.querySelector<HTMLElement>('[data-empty]');
-
-  function apply(filter: string, pushUrl: boolean) {
-    const [kind, value] = filter.split(':');
-    let visible = 0;
-
-    for (const section of sections) {
-      let shown = 0;
-      for (const li of section.querySelectorAll<HTMLElement>('li')) {
-        const match = kind === 'all' || (li.dataset.tags ?? '').split(',').includes(value);
-        li.hidden = !match;
-        if (match) shown++;
-      }
-      section.hidden = shown === 0;
-      visible += shown;
-    }
-
-    for (const chip of chips) {
-      const on = chip.dataset.filter === filter;
-      chip.classList.toggle('on', on);
-      if (on) chip.setAttribute('aria-current', 'true');
-      else chip.removeAttribute('aria-current');
-    }
-
-    if (countEl) countEl.textContent = `${visible}편`;
-    if (emptyEl) emptyEl.hidden = visible > 0;
-
-    if (pushUrl) {
-      const url = new URL(location.href);
-      url.search = '';
-      if (kind === 'tag') url.searchParams.set('tag', value);
-      history.replaceState(null, '', url);
-    }
-  }
-
-  for (const chip of chips) {
-    chip.addEventListener('click', (event) => {
-      // 새 탭·저장 등 수식키 클릭은 원래 링크 동작을 살려둔다
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault();
-      apply(chip.dataset.filter ?? 'all', true);
-    });
-  }
-
-  // 공유된 URL(?tag=생각)로 들어와도 같은 상태가 복원된다
-  const initialTag = new URLSearchParams(location.search).get('tag');
-  if (initialTag) apply(`tag:${initialTag}`, false);
-</script>
 
 <style>
   .head {
@@ -143,50 +23,5 @@ for (const post of posts) {
   .count {
     color: var(--muted);
     font-size: 0.875rem;
-  }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 1.25rem 0 2rem;
-  }
-  .chip {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.3rem;
-    padding: 0.3rem 0.7rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    color: var(--muted);
-    font-size: 0.875rem;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  .chip:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .chip.on {
-    border-color: var(--accent);
-    color: var(--accent);
-    font-weight: 600;
-  }
-  .chip .n {
-    font-size: 0.75rem;
-    opacity: 0.7;
-  }
-  .year {
-    margin-bottom: 2.5rem;
-  }
-  .year h2 {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--muted);
-    margin: 0 0 1rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .empty {
-    color: var(--muted);
   }
 </style>

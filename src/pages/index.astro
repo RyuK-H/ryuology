@@ -1,10 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
-import PostList from '../components/PostList.astro';
+import PostBrowser from '../components/PostBrowser.astro';
 import { SITE } from '../site';
 import { getPublishedPosts } from '../lib/posts';
 
-const posts = (await getPublishedPosts()).slice(0, 10);
+// 홈과 /posts/는 같은 목록을 보여준다 — 차이는 위의 소개 두 줄뿐.
+// 방문자가 습관적으로 홈으로 오는데 목록·필터가 /posts/에만 있으면 그 작업이 안 보인다.
+const posts = await getPublishedPosts();
 ---
 
 <Base>
@@ -12,9 +14,10 @@ const posts = (await getPublishedPosts()).slice(0, 10);
     AI가 콘텐츠를 쏟아내는 시대에, <span class="hl">사람이 직접 겪고 쓴 기록.</span>
   </p>
   <p class="tagline">// {SITE.tagline} — 개발자 류기혁의 개인 블로그</p>
-  <h2 class="listhead"><span class="c">▸</span> 최근 글</h2>
-  <PostList posts={posts} />
-  <p class="allposts"><a href="/posts/">전체 글 보기 →</a></p>
+  <h2 class="listhead">
+    <span class="c">▸</span> 글 <span class="count" data-count>{posts.length}편</span>
+  </h2>
+  <PostBrowser posts={posts} />
 </Base>
 
 <style>
@@ -41,8 +44,9 @@ const posts = (await getPublishedPosts()).slice(0, 10);
   .listhead .c {
     color: var(--faint);
   }
-  .allposts {
-    margin-top: 2rem;
-    font-size: 0.9rem;
+  .listhead .count {
+    color: var(--muted);
+    font-size: 0.875rem;
+    font-weight: 400;
   }
 </style>
