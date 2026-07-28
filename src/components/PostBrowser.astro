@@ -76,6 +76,9 @@ for (const post of posts) {
 
 <p class="empty" data-empty hidden>이 분류에 해당하는 글이 없습니다.</p>
 
+{/* 서버는 전부 렌더하고 JS가 10개로 접는다 — JS가 없거나 크롤러가 오면 전체가 그대로 보인다 */}
+<button type="button" class="more" data-more hidden>더보기 <span class="rest" data-rest></span></button>
+
 <script>
   // 칩은 진짜 링크다. JS가 있으면 페이지 이동 없이 그 자리에서 거르고, 없으면 링크로 동작한다.
   // 편수 표시([data-count])는 이 컴포넌트를 쓰는 페이지가 제목 옆에 두고, 여기서 값만 갱신한다.
@@ -83,20 +86,37 @@ for (const post of posts) {
   const sections = [...document.querySelectorAll<HTMLElement>('.year')];
   const countEl = document.querySelector<HTMLElement>('[data-count]');
   const emptyEl = document.querySelector<HTMLElement>('[data-empty]');
+  const moreEl = document.querySelector<HTMLButtonElement>('[data-more]');
+  const restEl = document.querySelector<HTMLElement>('[data-rest]');
 
-  function apply(filter: string, pushUrl: boolean) {
+  // 어떤 칩을 눌러도 처음엔 이만큼만 보인다 — 목록이 길면 푸터가 저 아래로 밀려나기 때문.
+  // 더보기는 한 번에 전부 편다. 이미 서버가 다 렌더해둔 상태라 나눠 펼 이유가 없다.
+  const INITIAL_COUNT = 10;
+  let filter = 'all';
+  let limit = INITIAL_COUNT;
+
+  function render() {
     const [kind, value] = filter.split(':');
-    let visible = 0;
+    let matched = 0; // 필터에 걸린 전체 개수 (편수 표시는 이 값)
+    let shown = 0; // 실제로 보이는 개수 (limit까지)
 
     for (const section of sections) {
-      let shown = 0;
+      let inSection = 0;
       for (const li of section.querySelectorAll<HTMLElement>('li')) {
         const match = kind === 'all' || (li.dataset.tags ?? '').split(',').includes(value);
-        li.hidden = !match;
-        if (match) shown++;
+        if (!match) {
+          li.hidden = true;
+          continue;
+        }
+        matched++;
+        const withinLimit = shown < limit;
+        li.hidden = !withinLimit;
+        if (withinLimit) {
+          shown++;
+          inSection++;
+        }
       }
-      section.hidden = shown === 0;
-      visible += shown;
+      section.hidden = inSection === 0;
     }
 
     for (const chip of chips) {
@@ -106,15 +126,24 @@ for (const post of posts) {
       else chip.removeAttribute('aria-current');
     }
 
-    if (countEl) countEl.textContent = `${visible}편`;
-    if (emptyEl) emptyEl.hidden = visible > 0;
+    if (countEl) countEl.textContent = `${matched}편`;
+    if (emptyEl) emptyEl.hidden = matched > 0;
 
-    if (pushUrl) {
-      const url = new URL(location.href);
-      url.search = '';
-      if (kind === 'tag') url.searchParams.set('tag', value);
-      history.replaceState(null, '', url);
-    }
+    const rest = matched - shown;
+    if (moreEl) moreEl.hidden = rest <= 0;
+    if (restEl) restEl.textContent = `${rest}편 남음`;
+  }
+
+  function select(next: string, pushUrl: boolean) {
+    filter = next;
+    limit = INITIAL_COUNT; // 칩을 바꾸면 다시 접는다
+    render();
+    if (!pushUrl) return;
+    const [kind, value] = filter.split(':');
+    const url = new URL(location.href);
+    url.search = '';
+    if (kind === 'tag') url.searchParams.set('tag', value);
+    history.replaceState(null, '', url);
   }
 
   for (const chip of chips) {
@@ -122,13 +151,18 @@ for (const post of posts) {
       // 새 탭·저장 등 수식키 클릭은 원래 링크 동작을 살려둔다
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      apply(chip.dataset.filter ?? 'all', true);
+      select(chip.dataset.filter ?? 'all', true);
     });
   }
 
+  moreEl?.addEventListener('click', () => {
+    limit = Infinity;
+    render();
+  });
+
   // 공유된 URL(?tag=생각)로 들어와도 같은 상태가 복원된다
   const initialTag = new URLSearchParams(location.search).get('tag');
-  if (initialTag) apply(`tag:${initialTag}`, false);
+  select(initialTag ? `tag:${initialTag}` : 'all', false);
 </script>
 
 <style>
@@ -176,5 +210,31 @@ for (const post of posts) {
   }
   .empty {
     color: var(--muted);
+  }
+  .more {
+    display: block;
+    width: 100%;
+    padding: 0.7rem 1rem;
+    margin-bottom: 2.5rem;
+    background: none;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  /* display를 지정한 요소는 클래스 우선순위가 [hidden]의 기본 display:none을 덮는다 —
+     명시하지 않으면 "0편 남음" 버튼이 숨겨지지 않는다 */
+  .more[hidden] {
+    display: none;
+  }
+  .more:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .more .rest {
+    opacity: 0.7;
+    font-size: 0.8125rem;
   }
 </style>
