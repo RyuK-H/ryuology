@@ -13,6 +13,7 @@ const posts = defineCollection({
     author: z.string().default('류기혁'), // 람쥐보고서 등 AI 기고는 '류람쥐'
     book: z.boolean().default(false), // '나 돌아보기' 챕터 여부 (연말 회고만 true)
     aiComment: z.string().optional(), // 글 하단에 달리는 AI(류람쥐)의 코멘트 — 문단은 빈 줄로 구분
+    authorReply: z.string().optional(), // 류람쥐 코멘트에 저자가 다는 대댓글 — aiComment가 있을 때만 렌더된다
 
   }),
 });

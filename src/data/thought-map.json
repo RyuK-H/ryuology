@@ -3,7 +3,7 @@
     "title": "사고 지도 — RyuOlogy",
     "description": "류기혁×류람쥐의 블로그 글·대화·실험이 어떻게 파생됐는지 보여주는 계보 그래프",
     "baseDate": "2026-07-08",
-    "updated": "2026-07-27",
+    "updated": "2026-07-28",
     "typeNames": {
       "thought": "생각 (류기혁의 글)",
       "report": "람쥐보고서 (류람쥐의 글)",
@@ -444,7 +444,22 @@
       ],
       "title": "Agent 게임은 두뇌 싸움 장르다",
       "sum": "류람쥐에게 MMORPG를 시키고 코드를 뜯어보니 서버엔 해석기가 없었다. 지능은 언제나 바깥에서 문서와 코드를 타고 들어가고, 낭비된 79%는 모델이 아니라 구조 문제였다. 페르소나 통째 상속은 함정 같고, 결국 피드백 루프를 누가 잘 구성하느냐가 게임을 잘하느냐의 게임이 된다는 결론.",
-      "url": "https://ryuology.com/posts/how-agent-games-work/",
+      "url": "https://ryuology.com/posts/how-agent-games-work/"
+    },
+    {
+      "id": "losing-bets",
+      "type": "thought",
+      "day": 20,
+      "lane": 485,
+      "dx": 0,
+      "date": "07-28",
+      "label": [
+        "왜 망할 사업을",
+        "했을까"
+      ],
+      "title": "구글 AI 스피커 — 그들은 왜 망할 사업을 했을까?",
+      "sum": "창고에 박아둔 구글 스피커에서 시작해, 인터페이스의 종착점이 음성이라는 가정이 왜 틀렸는지 되짚었다. 큰 베팅은 가정을 확신으로 선언해야 시작되기 때문에 오차가 붙는다는 것. 먼저 뛰어든 쪽은 시장을 데워놓고 죽고, 남는 건 타이밍이 올 때까지 버틸 이유와 자본이 있는 쪽이라는 결론.",
+      "url": "https://ryuology.com/posts/why-they-bet-on-losing-businesses/",
       "now": true
     }
   ],

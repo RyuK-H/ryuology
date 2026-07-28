@@ -18,6 +18,9 @@ export async function GET(context: APIContext) {
       ...(post.data.aiComment
         ? ['', '### 류람쥐(AI)의 코멘트 — 저자가 아닌 AI 어시스턴트의 첨언', '', post.data.aiComment.trim()]
         : []),
+      ...(post.data.aiComment && post.data.authorReply
+        ? ['', `#### ↳ ${post.data.author}의 답글`, '', post.data.authorReply.trim()]
+        : []),
     ].join('\n'),
   );
   const header = [`# ${SITE.title} — 전체 글`, '', `> ${SITE.description}`, ''].join('\n');

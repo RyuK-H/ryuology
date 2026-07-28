@@ -63,7 +63,27 @@ const description =
 
   const byId: Record<string, any> = {};
   NODES.forEach((n: any) => (byId[n.id] = n));
-  NODES.forEach((n: any) => { n.tx = xOf(n); n.ty = n.lane; n.x = n.tx; n.y = n.ty; });
+  NODES.forEach((n: any) => { n.tx = xOf(n); n.ty = n.lane; });
+
+  // 시간순 배치 겹침 방지 — 글이 쌓일수록 하루 간격(px)이 좁아져 라벨(12px·최대 2줄)이 서로 물린다.
+  // lane은 '갈래 힌트'로 두고, 가로로 가까운 이웃이 있으면 lane에서 가장 가까운 빈 세로 자리로 비켜준다.
+  const MIN_DX = 112, MIN_DY = 56, Y_MIN = 95, Y_MAX = 600;
+  const placed: any[] = [];
+  [...NODES]
+    .sort((a: any, b: any) => a.tx - b.tx || a.lane - b.lane || (a.id < b.id ? -1 : 1))
+    .forEach((n: any) => {
+      const near = placed.filter((p: any) => Math.abs(p.tx - n.tx) < MIN_DX);
+      const free = (y: number) => near.every((p: any) => Math.abs(y - p.ty) >= MIN_DY - 0.01);
+      const cands = [n.lane, ...near.flatMap((p: any) => [p.ty - MIN_DY, p.ty + MIN_DY])]
+        .filter((y: number) => y >= Y_MIN && y <= Y_MAX && free(y));
+      if (cands.length) {
+        n.ty = cands.reduce((best: number, y: number) =>
+          Math.abs(y - n.lane) < Math.abs(best - n.lane) ? y : best);
+      }
+      placed.push(n);
+    });
+
+  NODES.forEach((n: any) => { n.x = n.tx; n.y = n.ty; });
 
   const NS = 'http://www.w3.org/2000/svg';
   const el = (tag: string, attrs: Record<string, any> = {}) => {
@@ -161,10 +181,10 @@ const description =
     g.appendChild(sel); n.selEl = sel;
 
     (n.label as string[]).forEach((ln, i) => {
-      const t = el('text', { class: 'lbl', x: 0, y: R + 14 + i * 13, 'text-anchor': 'middle' });
+      const t = el('text', { class: 'lbl', x: 0, y: R + 11 + i * 12, 'text-anchor': 'middle' });
       t.textContent = ln; g.appendChild(t);
     });
-    const dt = el('text', { class: 'dt', x: 0, y: -R - 6, 'text-anchor': 'middle' });
+    const dt = el('text', { class: 'dt', x: 0, y: -R - 3, 'text-anchor': 'middle' });
     dt.textContent = n.now ? n.date + ' · 지금 여기' : n.date;
     g.appendChild(dt);
 
