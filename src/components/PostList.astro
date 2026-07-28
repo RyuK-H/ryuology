@@ -5,19 +5,25 @@ import { AUTHOR_EMOJI } from '../site';
 
 interface Props {
   posts: Post[];
+  // 연도 헤딩 아래에 놓일 때는 날짜에서 연도를 뺀다 (/posts/ 목록)
+  hideYear?: boolean;
 }
 
-const { posts } = Astro.props;
+const { posts, hideYear = false } = Astro.props;
+
+// data-* 는 /posts/의 칩 필터가 클라이언트에서 읽는다. 다른 페이지에선 그냥 안 쓰인다.
 ---
 
 <ul class="post-list">
   {
     posts.map((post) => (
-      <li>
+      <li data-tags={post.data.tags.join(',')}>
         <a href={`/posts/${post.id}/`}>
           <span class="author-emoji">{AUTHOR_EMOJI[post.data.author] ?? ''}</span> {post.data.title}
         </a>
-        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+        <time datetime={post.data.pubDate.toISOString()}>
+          {hideYear ? formatDate(post.data.pubDate).slice(5) : formatDate(post.data.pubDate)}
+        </time>
         <p>{post.data.description}</p>
       </li>
     ))
