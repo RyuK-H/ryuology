@@ -41,6 +41,9 @@ export interface RelatedLink {
 const MAX_LINKS = 2;
 const RETRO_TAG = '회고';
 const RETRO_ROOT_NODE = 'retro';
+// 저자가 "이어진 곳이 없다"고 판단한 단독 글 — 계보 누락 경고에서 제외 (억지 연결 금지 원칙).
+// losing-bets: 2026-07-29 기혁님 확정.
+const STANDALONE_NODES = new Set(['losing-bets']);
 
 let cache: Map<string, RelatedLink[]> | null = null;
 
@@ -119,7 +122,7 @@ async function build(): Promise<Map<string, RelatedLink[]>> {
         const link = toLink(edge.s, 'parent', edge.why);
         if (link) links.push(link);
       }
-      if (parents.length === 0) {
+      if (parents.length === 0 && !STANDALONE_NODES.has(nodeId)) {
         problems.push(
           `"${post.id}" (노드 ${nodeId}): 부모 엣지가 없습니다 — 사고 지도에 계보가 안 붙어 있습니다.`,
         );
@@ -146,7 +149,7 @@ async function build(): Promise<Map<string, RelatedLink[]>> {
       problems.push(`"${post.id}": 사고 지도에 노드가 없습니다 — 발행했으면 지도에도 올려야 합니다.`);
     }
 
-    if (links.length === 0) {
+    if (links.length === 0 && !(nodeId && STANDALONE_NODES.has(nodeId))) {
       problems.push(`"${post.id}": 다음 읽을 글이 한 편도 안 잡힙니다.`);
     }
     result.set(post.id, links);
