@@ -27,9 +27,17 @@ export async function getPublishedPosts(): Promise<Post[]> {
   return sorted;
 }
 
+// 표시 날짜는 항상 KST(Asia/Seoul) 기준으로 찍는다.
+// getFullYear/getMonth/getDate는 빌드 머신의 로컬 타임존을 쓰므로, 로컬(KST) 빌드와
+// Workers Builds CI(UTC) 빌드가 같은 글을 하루 다르게 렌더한다 — KST 00:00~09:00 발행 글이 UTC로 전날.
+// sv-SE 로케일은 YYYY-MM-DD를 내주고, timeZone 옵션이 빌드 환경과 무관하게 KST로 고정한다.
+const dateFmt = new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
 export function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return dateFmt.format(date);
 }
