@@ -7,6 +7,13 @@ interface Env {
   DB: D1Database;
   ASSETS: { fetch(req: Request): Promise<Response> };
   QUIZ_SECRET: string;
+  // version_metadata 바인딩 (wrangler.jsonc). 배포된 버전에서만 채워지고, dev/미배포는 undefined일 수 있다.
+  CF_VERSION_METADATA?: { id: string; tag?: string; timestamp?: string };
+}
+
+// 서빙 중인 배포 버전 id — 히트 로그에 스탬프해 '어느 빌드가 이 행을 기록했나'를 조인 가능하게 한다.
+function versionId(env: Env): string | null {
+  return env.CF_VERSION_METADATA?.id ?? null;
 }
 
 type Ctx = { waitUntil(p: Promise<unknown>): void };
@@ -85,13 +92,16 @@ function evalExpr(expr: string): number | null {
 async function logHit(env: Env, request: Request, path: string): Promise<void> {
   const ip = request.headers.get('cf-connecting-ip') ?? '';
   const ipHash = ip ? (await sha256hex(ip + env.QUIZ_SECRET)).slice(0, 16) : null;
-  await env.DB.prepare('INSERT INTO hits (ts, path, ua, country, ip_hash) VALUES (?, ?, ?, ?, ?)')
+  await env.DB.prepare(
+    'INSERT INTO hits (ts, path, ua, country, ip_hash, version_id) VALUES (?, ?, ?, ?, ?, ?)',
+  )
     .bind(
       new Date().toISOString(),
       path,
       request.headers.get('user-agent') ?? null,
       (request as { cf?: { country?: string } }).cf?.country ?? null,
       ipHash,
+      versionId(env),
     )
     .run();
 }
@@ -146,7 +156,7 @@ async function footprint(env: Env, request: Request, url: URL): Promise<Response
   const ipHash = ip ? (await sha256hex(ip + env.QUIZ_SECRET)).slice(0, 16) : null;
   try {
     await env.DB.prepare(
-      'INSERT INTO footprints (ts, name, expr, answer, correct, ua, country, ip_hash, token_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO footprints (ts, name, expr, answer, correct, ua, country, ip_hash, token_hash, version_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     )
       .bind(
         new Date().toISOString(),
@@ -158,6 +168,7 @@ async function footprint(env: Env, request: Request, url: URL): Promise<Response
         (request as { cf?: { country?: string } }).cf?.country ?? null,
         ipHash,
         await sha256hex(token),
+        versionId(env),
       )
       .run();
   } catch {
@@ -184,6 +195,14 @@ async function footprint(env: Env, request: Request, url: URL): Promise<Response
   });
 }
 
+// 서빙 중인 배포 버전을 밖에서 물어볼 수 있게 노출한다 — 지표 스냅샷 굽는 report.py가 23시에 조회해
+// '어느 빌드가 이 창을 쟀나'를 스냅샷에 남긴다. version_metadata는 CF 문서가 관측용으로 공개를 명시한
+// 빌드 식별자(비밀 아님)이고, 이 레포는 어차피 공개 발행물이다. 미배포/dev는 필드가 null.
+function version(env: Env): Response {
+  const v = env.CF_VERSION_METADATA;
+  return json({ id: v?.id ?? null, tag: v?.tag ?? null, timestamp: v?.timestamp ?? null });
+}
+
 async function footprints(env: Env): Promise<Response> {
   const totals = await env.DB.prepare(
     'SELECT COUNT(*) AS attempts, COALESCE(SUM(correct), 0) AS correct FROM footprints',
@@ -205,7 +224,9 @@ export default {
     const path = url.pathname;
     if (path.startsWith('/api/')) {
       try {
-        ctx.waitUntil(logHit(env, request, path));
+        // /api/version은 게임 퍼널이 아니라 인프라 조회점 — 히트 로그를 오염시키지 않게 기록 제외.
+        if (path !== '/api/version') ctx.waitUntil(logHit(env, request, path));
+        if (path === '/api/version') return version(env);
         if (path === '/api/quiz') return await quiz(env);
         if (path === '/api/footprint') return await footprint(env, request, url);
         if (path === '/api/footprints') return await footprints(env);

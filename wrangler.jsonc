@@ -15,5 +15,9 @@
       "database_name": "ryuology-footprints",
       "database_id": "2020c6f6-ccbc-4bad-9b87-a36b08b5e967"
     }
-  ]
+  ],
+  // 런타임 Worker가 자기 배포 버전(id·tag·timestamp)을 알게 한다 (env.CF_VERSION_METADATA).
+  // 히트 로그·지표 스냅샷에 이 id를 붙여, 지표가 흔들린 날을 배포와 조인할 수 있게 한다
+  // (그전엔 "어느 빌드가 쟀나"가 원리적으로 미상 — 제안 20260804-1300).
+  "version_metadata": { "binding": "CF_VERSION_METADATA" }
 }

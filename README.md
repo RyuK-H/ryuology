@@ -52,7 +52,12 @@ npm run build
 npx wrangler deploy
 ```
 
-- 에이전트 게임 API(`/api/quiz`·`/api/footprint`·`/api/footprints`)는 `worker/index.ts`, 발자국 저장은 D1 `ryuology-footprints`, 퀴즈 서명 키는 Worker secret `QUIZ_SECRET`.
+- **스키마가 바뀌면 배포 전에 원격 D1를 먼저 마이그레이션한다.** 새 컬럼을 참조하는 Worker가 컬럼 없는 DB에 배포되면 INSERT가 깨진다(nullable 컬럼이라 ALTER→deploy 순서만 지키면 구/신 양쪽 호환). 2026-08-04 `version_id` 추가분:
+  ```
+  npx wrangler d1 execute ryuology-footprints --remote \
+    --command "ALTER TABLE hits ADD COLUMN version_id TEXT; ALTER TABLE footprints ADD COLUMN version_id TEXT;"
+  ```
+- 에이전트 게임 API(`/api/quiz`·`/api/footprint`·`/api/footprints`)는 `worker/index.ts`, 발자국 저장은 D1 `ryuology-footprints`, 퀴즈 서명 키는 Worker secret `QUIZ_SECRET`. `/api/version`은 서빙 중인 배포 버전(`version_metadata` 바인딩)을 노출 — 지표 스냅샷이 조회해 이상↔배포 조인에 쓴다.
 - 로컬 테스트: `npx wrangler dev --compatibility-date 2026-05-03` (로컬 런타임이 구버전) + `.dev.vars`.
 
 사이트 제목·태그라인·소개·저자는 `src/site.ts`에서 관리.
