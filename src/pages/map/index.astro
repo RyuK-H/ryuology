@@ -31,7 +31,7 @@ const description =
         <button id="tm-z-out" aria-label="축소">−</button>
         <button id="tm-z-rst" class="rst" aria-label="원래 배율로">처음</button>
       </div>
-      <div class="tmap-zoomhint">스크롤 = 확대/축소 · 드래그 = 이동</div>
+      <div class="tmap-zoomhint" id="tm-hint">스크롤 = 확대/축소 · 드래그 = 이동</div>
     </div>
 
     <div class="tmap-detail" id="tm-detail">
@@ -119,12 +119,53 @@ const description =
     zoomAt(ev.deltaY < 0 ? 0.87 : 1 / 0.87, p.x, p.y);
   }, { passive: false });
 
+  // viewBox 세로는 실제 렌더 박스 비율에 맞춘다 — 어긋나면 preserveAspectRatio가 레터박스를 만들고
+  // svgPoint(클라이언트px → viewBox좌표) 환산이 통째로 틀어진다.
+  const clamp = (v: number, lo: number, hi: number) =>
+    lo > hi ? (lo + hi) / 2 : Math.min(hi, Math.max(lo, v));
+  const boxAspect = () => {
+    const r = svg.getBoundingClientRect();
+    return r.width && r.height ? r.height / r.width : H / W;
+  };
+  function resetView() {
+    const r = svg.getBoundingClientRect();
+    // 좁은 화면에 1200 전체를 넣으면 12px 라벨이 뭉개진다 — 렌더 폭의 1.25배만 담고 나머지는 드래그로 본다.
+    view.w = r.width && r.width < 760 ? Math.min(W, Math.max(420, r.width * 1.25)) : W;
+    view.h = view.w * boxAspect();
+    const now: any = NODES.find((n: any) => n.now);
+    const cx = view.w >= W ? W / 2 : now ? now.x : W - view.w / 2;
+    view.x = clamp(cx - view.w / 2, 0, W - view.w);
+    view.y = clamp(H / 2 - view.h / 2, 0, H - view.h);
+    applyView();
+  }
+
   let panning: any = null, moved = false;
+  const pts = new Map<number, { x: number; y: number }>();
+  let pinch: any = null;
+
   svg.addEventListener('pointerdown', (ev) => {
+    pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pts.size === 2) {
+      const [a, b] = [...pts.values()];
+      pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) };
+      panning = null; moved = true; // 두 손가락은 클릭이 아니다
+      return;
+    }
     panning = { id: ev.pointerId, px: ev.clientX, py: ev.clientY, vx: view.x, vy: view.y };
     moved = false;
   });
   svg.addEventListener('pointermove', (ev) => {
+    if (pts.has(ev.pointerId)) pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pinch && pts.size >= 2) {
+      const [a, b] = [...pts.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d > 0 && pinch.d > 0) {
+        const p = svgPoint((a.x + b.x) / 2, (a.y + b.y) / 2);
+        zoomAt(pinch.d / d, p.x, p.y); // 벌리면 factor<1 = 확대 (휠과 같은 규약)
+      }
+      pinch.d = d;
+      return;
+    }
     if (!panning) return;
     const r = svg.getBoundingClientRect();
     const dx = ((ev.clientX - panning.px) / r.width) * view.w;
@@ -135,18 +176,33 @@ const description =
     }
     if (moved) { view.x = panning.vx - dx; view.y = panning.vy - dy; applyView(); }
   });
-  svg.addEventListener('pointerup', () => (panning = null));
-  svg.addEventListener('pointercancel', () => (panning = null));
+  const endPointer = (ev: PointerEvent) => {
+    pts.delete(ev.pointerId);
+    if (pts.size < 2) pinch = null;
+    if (panning && (panning.id === ev.pointerId || pts.size === 0)) panning = null;
+  };
+  svg.addEventListener('pointerup', endPointer);
+  svg.addEventListener('pointercancel', endPointer);
   svg.style.cursor = 'grab';
-  svg.style.touchAction = 'none';
 
   document.getElementById('tm-z-in')!.addEventListener('click', () =>
     zoomAt(0.75, view.x + view.w / 2, view.y + view.h / 2));
   document.getElementById('tm-z-out')!.addEventListener('click', () =>
     zoomAt(1 / 0.75, view.x + view.w / 2, view.y + view.h / 2));
-  document.getElementById('tm-z-rst')!.addEventListener('click', () => {
-    view.x = 0; view.y = 0; view.w = W; view.h = H; applyView();
+  document.getElementById('tm-z-rst')!.addEventListener('click', resetView);
+
+  // 회전·리사이즈로 박스 비율이 바뀌면 세로만 다시 맞춘다 (보고 있던 위치는 유지)
+  addEventListener('resize', () => {
+    const target = view.w * boxAspect();
+    view.y += (view.h - target) / 2;
+    view.h = target;
+    applyView();
   });
+
+  if (matchMedia('(hover: none)').matches) {
+    document.getElementById('tm-hint')!.textContent = '두 손가락 = 확대/축소 · 드래그 = 이동';
+  }
+  resetView();
 
   // ---- 그래프 구성 ----
   const gEdges = el('g'); svg.appendChild(gEdges);
@@ -450,15 +506,24 @@ const description =
   .tmap-legend .it { display: inline-flex; align-items: center; gap: 0.35rem; }
   .tmap-legend svg { display: block; }
 
+  /* 스테이지는 스크롤 컨테이너가 아니다 — 이동은 viewBox 팬 하나로 통일한다.
+     (예전엔 overflow-x:auto + svg min-width:980px 이었는데, 그러면 ① 네이티브 가로 스크롤과
+      viewBox 팬이 공존해 조작 결과가 갈리고 ② 이 안에 절대배치된 .tmap-zoom 이 스크롤과 함께
+      밀려나 "상단을 드래그하면 +/− 버튼이 같이 움직이는" 모바일 버그가 됐다.) */
   .tmap-stage {
     position: relative;
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 6px;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
+    touch-action: none; /* svg·버튼 포함 — 터치 시작 지점에 따라 동작이 갈리지 않게 */
   }
-  .tmap-stage svg { display: block; min-width: 980px; width: 100%; height: auto; }
+  .tmap-stage svg { display: block; width: 100%; height: auto; }
+  @media (max-width: 760px) {
+    /* 좁은 화면은 가로로 흘리는 대신 세로 공간을 주고, viewBox를 확대해 라벨 가독성을 지킨다 */
+    .tmap-stage { height: 66vh; min-height: 360px; max-height: 560px; }
+    .tmap-stage svg { height: 100%; }
+  }
   .tmap-zoom { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; z-index: 2; }
   .tmap-zoom button {
     appearance: none;
