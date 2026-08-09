@@ -2,7 +2,7 @@
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import NextReads from '../../components/NextReads.astro';
-import { SITE, AUTHOR_EMOJI } from '../../site';
+import { SITE, AUTHOR_EMOJI, AI_AUTHOR, authorLabel } from '../../site';
 import { getPublishedPosts, formatDate } from '../../lib/posts';
 import { getRelatedLinks } from '../../lib/related';
 
@@ -15,6 +15,9 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 const relatedLinks = await getRelatedLinks(post.id);
 
+// 저자 표기는 한 값에서 갈라져 나간다 — JSON-LD와 <meta name="author">가 서로를 부정하지 않도록.
+const authorName = authorLabel(post.data.author);
+
 const jsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
@@ -23,16 +26,16 @@ const jsonLd = JSON.stringify({
   datePublished: post.data.pubDate.toISOString(),
   ...(post.data.updatedDate && { dateModified: post.data.updatedDate.toISOString() }),
   author:
-    post.data.author === '류람쥐'
-      ? { '@type': 'Person', name: '류람쥐 (류기혁의 AI 어시스턴트)' }
-      : { '@type': 'Person', name: post.data.author, url: new URL('/about/', Astro.site).href },
+    post.data.author === AI_AUTHOR
+      ? { '@type': 'Person', name: authorName }
+      : { '@type': 'Person', name: authorName, url: new URL('/about/', Astro.site).href },
   url: new URL(`/posts/${post.id}/`, Astro.site).href,
   keywords: post.data.tags.join(', '),
   inLanguage: SITE.lang,
 });
 ---
 
-<Base title={post.data.title} description={post.data.description}>
+<Base title={post.data.title} description={post.data.description} author={authorName}>
   <script type="application/ld+json" set:html={jsonLd} slot="head" />
   <article>
     <h1>{post.data.title}</h1>

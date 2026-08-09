@@ -1,5 +1,5 @@
 import type { APIContext } from 'astro';
-import { SITE } from '../site';
+import { SITE, authorLabel } from '../site';
 import { getPublishedPosts, formatDate } from '../lib/posts';
 
 // llms-full.txt — 전체 글 본문 통합본
@@ -12,7 +12,7 @@ export async function GET(context: APIContext) {
       '',
       `> ${post.data.description}`,
       '',
-      `발행: ${formatDate(post.data.pubDate)} | 저자: ${SITE.author} | 원문: ${new URL(`/posts/${post.id}/`, site).href}`,
+      `발행: ${formatDate(post.data.pubDate)} | 저자: ${authorLabel(post.data.author)} | 원문: ${new URL(`/posts/${post.id}/`, site).href}`,
       '',
       post.body ?? '',
       ...(post.data.aiComment

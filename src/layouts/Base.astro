@@ -4,9 +4,11 @@ import { SITE } from '../site';
 interface Props {
   title?: string;
   description?: string;
+  /** 이 페이지의 저자 — 넘기지 않으면 사이트 저자. AI 명의 글은 반드시 넘겨야 한다 (JSON-LD와 같은 값). */
+  author?: string;
 }
 
-const { title, description = SITE.description } = Astro.props;
+const { title, description = SITE.description, author = SITE.author } = Astro.props;
 const pageTitle = title ? `${title} — ${SITE.title}` : `${SITE.title} — ${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og.png', Astro.site);
@@ -35,7 +37,7 @@ const nav = [
     <meta name="google-site-verification" content="DdFpk-SyU-dKRRvVVErO2uY9aFg-Op2RaNp-AHSWXPE" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <meta name="author" content={SITE.author} />
+    <meta name="author" content={author} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
