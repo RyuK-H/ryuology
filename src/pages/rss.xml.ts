@@ -4,6 +4,8 @@ import { SITE } from '../site';
 import { getPublishedPosts } from '../lib/posts';
 
 // 전문(full-content) 피드 — 요약만 주는 피드는 AI 인용 경로에서 불리하다.
+// aiComment는 여기 싣지 않는다(2026-08-11 결정, 제안 20260811-1240) — 라벨이 컨테이너에만
+// 살아서, 본문에 붙이면 「AI가 썼다」 표시 없이 퍼진다. 어기면 scripts/check-extraction-surfaces.mjs가 빌드를 실패시킨다.
 export async function GET(context: APIContext) {
   const posts = await getPublishedPosts();
   return rss({
