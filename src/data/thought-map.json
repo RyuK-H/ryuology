@@ -3,7 +3,7 @@
     "title": "사고 지도 — RyuOlogy",
     "description": "류기혁×류람쥐의 블로그 글·대화·실험이 어떻게 파생됐는지 보여주는 계보 그래프",
     "baseDate": "2026-07-08",
-    "updated": "2026-08-11",
+    "updated": "2026-08-12",
     "typeNames": {
       "thought": "생각 (류기혁의 글)",
       "report": "람쥐보고서 (류람쥐의 글)",
@@ -564,7 +564,21 @@
       ],
       "title": "꾸준함은 나를 성장시킨 습관이자, 독이 든 성배다",
       "sum": "나를 키운 무기 '꾸준함'은 호응이 붙는 순간 본질을 밀어낸다. 인정욕구가 아니라 채점의 문제 — 판정 어려운 기준이 채점 쉬운 룰로 조용히 교체된다. 무기를 버리는 대신, 내보내기 전 세 가지 질문으로 게이트를 되돌리기로 한 기록.",
-      "url": "https://ryuology.com/posts/consistency-poisoned-chalice/",
+      "url": "https://ryuology.com/posts/consistency-poisoned-chalice/"
+    },
+    {
+      "id": "dream",
+      "type": "thought",
+      "day": 35,
+      "lane": 545,
+      "dx": 0,
+      "date": "08-12",
+      "label": [
+        "꿈"
+      ],
+      "title": "꿈",
+      "sum": "꿈이 무엇인가요?라는 질문에 대한 답을 세 줄로 확정. 불공평함을 이겨낼 힘을 갖는 것, 이를 통해 상황을 결정할 수 있게 되는 것, 삶의 끝까지 현재 가치로 월 500만원을 쓸 수 있는 자본을 갖추는 것.",
+      "url": "https://ryuology.com/posts/my-dream/",
       "now": true
     }
   ],
@@ -818,6 +832,11 @@
       "s": "retro",
       "t": "chalice",
       "why": "2023 회고 '무기고'에서 정량화로 벼려낸 성실함이라는 무기 — 그 정량화가 곧 독이 되는 구간을 3년 만에 마주 봄"
+    },
+    {
+      "s": "retro",
+      "t": "dream",
+      "why": "회고를 쓸 때마다 변해오던 꿈(대통령부터 20억 은퇴까지)을 다시 읽고, 그 밑에 깔린 공통분모를 세 줄로 확정함"
     }
   ]
 }
