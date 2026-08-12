@@ -1,6 +1,6 @@
 import type { APIContext } from 'astro';
 import { SITE, authorLabel } from '../site';
-import { getPublishedPosts, formatDate } from '../lib/posts';
+import { absolutizePayloadLinks, getPublishedPosts, formatDate } from '../lib/posts';
 
 // llms-full.txt — 전체 글 본문 통합본
 export async function GET(context: APIContext) {
@@ -14,7 +14,7 @@ export async function GET(context: APIContext) {
       '',
       `발행: ${formatDate(post.data.pubDate)} | 저자: ${authorLabel(post.data.author)} | 원문: ${new URL(`/posts/${post.id}/`, site).href}`,
       '',
-      post.body ?? '',
+      absolutizePayloadLinks(post.body ?? '', site),
       ...(post.data.aiComment
         ? ['', '### 류람쥐(AI)의 코멘트 — 저자가 아닌 AI 어시스턴트의 첨언', '', post.data.aiComment.trim()]
         : []),

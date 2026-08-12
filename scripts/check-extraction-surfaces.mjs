@@ -48,7 +48,17 @@ function pickProbe(text) {
     const m = line.match(/[^&<>"']{20,}/);
     if (m) return m[0].slice(0, 40);
   }
-  return null;
+  // 20자 미만의 짧은 코멘트(실측: "화이팅" 한 마디)는 위 규칙에 안 걸린다 —
+  // 가장 긴 무이스케이프 구간으로 폴백. 탐침이 짧을수록 RSS 음성 검사에서
+  // 본문 우연 일치 위험이 커지지만, 그 경우 가드는 조용히가 아니라 시끄럽게 실패한다.
+  let best = '';
+  for (const line of text.split('\n')) {
+    for (const m of line.matchAll(/[^&<>"']+/g)) {
+      const s = m[0].trim();
+      if (s.length > best.length) best = s;
+    }
+  }
+  return best.length >= 2 ? best.slice(0, 40) : null;
 }
 
 const failures = [];
@@ -121,10 +131,32 @@ if (rss.includes(LABEL)) {
   failures.push(`rss.xml에 「${LABEL}」 라벨이 실렸습니다 — 결정(20260811-1240)은 RSS 미탑재입니다`);
 }
 
+// 페이로드 3면의 상대경로 0건 검사 (2026-08-12, 제안 20260812-1250).
+// 사본과 함께 이동하는 건 페이로드 안 문자열뿐 — 이미지 src와 내부 링크가 상대경로면
+// 설명(alt)은 건너가는데 설명 대상이 안 건너간다. HTML은 검사 대상이 아니다(상대경로가 맞다).
+const payloadSurfaces = [
+  ['rss.xml', rss],
+  ['llms-full.txt', llmsFull],
+  ...readdirSync(join(distDir, 'posts'))
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => [`posts/${f}`, readFileSync(join(distDir, 'posts', f), 'utf8')]),
+];
+for (const [name, text] of payloadSurfaces) {
+  const rel = [...text.matchAll(/\]\((\/[^)\s]*)/g)].map((m) => m[1]);
+  if (rel.length > 0) {
+    const shown = [...new Set(rel)].slice(0, 5).join(', ');
+    failures.push(
+      `[${name}] 페이로드에 상대경로 ${rel.length}건이 남았습니다 (${shown}${rel.length > 5 ? ' …' : ''}) ` +
+        `— src/lib/posts.ts의 absolutizePayloadLinks를 거치는지 확인하세요`,
+    );
+  }
+}
+
 if (failures.length > 0) {
   console.error('✖ 추출면 대조 실패:\n' + failures.map((f) => `  - ${f}`).join('\n'));
   process.exit(1);
 }
 console.log(
-  `✔ 추출면 대조 통과 — aiComment ${withComment.length}편: HTML ✓ / llms-full ✓ / RSS 미탑재 ✓`,
+  `✔ 추출면 대조 통과 — aiComment ${withComment.length}편: HTML ✓ / llms-full ✓ / RSS 미탑재 ✓ | ` +
+    `페이로드 상대경로 0건 (${payloadSurfaces.length}면) ✓`,
 );

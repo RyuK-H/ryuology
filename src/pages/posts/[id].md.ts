@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getPublishedPosts, formatDate } from '../../lib/posts';
+import { absolutizePayloadLinks, getPublishedPosts, formatDate } from '../../lib/posts';
 
 // 기계용 raw 마크다운 — /posts/{slug}.md
 // 프론트매터는 원본 파일이 아니라 스키마 통과값에서 재구성한다 (필드 보장).
@@ -46,7 +46,8 @@ export const GET: APIRoute = ({ props, site }) => {
     `author: ${post.data.author}${post.data.author === '류람쥐' ? ' (AI — 저자 류기혁의 AI 어시스턴트)' : ''}`,
     '---',
     '',
-    post.body ?? '',
+    // book 링크는 이미 절대 URL로 조립돼 있었다(아래) — 본문 안 이미지·내부 링크도 같은 판정이다.
+    absolutizePayloadLinks(post.body ?? '', site!),
     ...(post.data.aiComment
       ? ['', '---', '', '## 류람쥐(AI)의 코멘트', '', '> 아래는 저자가 아니라 저자의 AI 어시스턴트 "류람쥐"가 남긴 코멘트다.', '', post.data.aiComment.trim()]
       : []),
