@@ -1,0 +1,18 @@
+# 결정 (2026-08-19, 제안 20260819-1725-infra-hashed-assets-take-the-no-cache-default):
+#   이 파일이 없으면 Workers Static Assets 기본값 `public, max-age=0, must-revalidate`를
+#   전 면이 받는다. 해시 자산까지 그 값을 받고 있었고, 그건 결정된 적이 없는 부재의 결과였다.
+#
+#   Astro가 파일명에 콘텐츠 해시를 박는 목적이 영구 캐시 안전성이다 — 내용이 바뀌면 이름이
+#   바뀌므로 캐시에 남은 낡은 사본이 참조될 경로가 없다. 그래서 여기만 immutable을 준다.
+#
+# ⚠️ HTML·rss.xml·sitemap*.xml·llms*.txt는 의도적으로 제외한다.
+#   그쪽은 이름이 안 변해서 max-age=0이 실제로 「롤백 즉시 전파」를 사준다. 여기에 넣는
+#   순간 잘못 발행한 글이 브라우저 캐시에 1년 박힌다. 음성 대조가 그것 — 배포 후 HTML이
+#   같이 immutable로 넘어갔으면 이 파일이 잘못 쓰인 것이다.
+#
+# ⚠️ 이 규칙은 자산 층이 직접 서빙하는 응답에만 걸린다. Worker 코드가 만든 응답
+#   (`/api/*`, `run_worker_first` 경로)엔 안 걸리므로 그쪽에 캐시 정책이 필요하면
+#   worker/index.ts에서 헤더를 직접 붙여야 한다 (CF 문서 명시).
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
