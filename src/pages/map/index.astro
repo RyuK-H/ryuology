@@ -37,6 +37,30 @@ const description =
     <div class="tmap-detail" id="tm-detail">
       <p class="hint">노드를 클릭하면 상세 내용과 연결 이유가 여기에 표시됩니다.</p>
     </div>
+
+    {/* 서버 렌더 정적 목록 — 위 그래프는 클라이언트 렌더라 무-JS HTML에 앵커가 0개였다
+        (2026-09-01 실측: <a> 전체 1개, posts/… 문자열 33개는 전부 스크립트 페이로드).
+        관계를 보여주는 것이 이 면의 존재 목적이므로 노드 목록만은 마크업으로도 내보낸다. */}
+    <details class="tmap-index">
+      <summary>계보 목록 (텍스트판)</summary>
+      <ol>
+        {[...data.nodes]
+          .sort((a, b) => a.day - b.day)
+          .map((n) =>
+            n.url ? (
+              <li>
+                <a href={n.url.replace('https://ryuology.com', '')}>{n.title}</a>
+                <span class="d">{n.date}</span>
+              </li>
+            ) : (
+              <li>
+                {n.title}
+                <span class="d">{n.date}</span>
+              </li>
+            )
+          )}
+      </ol>
+    </details>
   </div>
 </Base>
 
@@ -625,4 +649,20 @@ const description =
   .tmap-detail .c b { color: var(--fg); font-weight: 600; cursor: pointer; }
   .tmap-detail .c b:hover { color: var(--accent); }
   .tmap-detail .c .why { color: var(--faint); }
+
+  .tmap-index { margin-top: 0.8rem; font-size: 0.85rem; }
+  .tmap-index summary {
+    cursor: pointer;
+    color: var(--faint);
+    font-size: 0.78rem;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  .tmap-index ol { margin: 0.6rem 0 0; padding-left: 1.4rem; color: var(--muted); }
+  .tmap-index li { margin: 0.15rem 0; }
+  .tmap-index .d {
+    color: var(--faint);
+    font-size: 0.72rem;
+    margin-left: 0.5rem;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  }
 </style>
