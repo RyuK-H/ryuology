@@ -13,6 +13,22 @@
 # ⚠️ 이 규칙은 자산 층이 직접 서빙하는 응답에만 걸린다. Worker 코드가 만든 응답
 #   (`/api/*`, `run_worker_first` 경로)엔 안 걸리므로 그쪽에 캐시 정책이 필요하면
 #   worker/index.ts에서 헤더를 직접 붙여야 한다 (CF 문서 명시).
+#
+# 비용 정정 (2026-08-24, 제안 20260824-1355-ryuology-html-has-no-validator):
+#   위 제외의 대가를 08-19엔 「바이트가 아니라 왕복 — ETag가 있어 재검증이 304/0바이트」로
+#   적었는데, 그 ETag는 immutable을 받은 /_astro/*.css(= 애초에 재검증을 안 하는 면)에서
+#   잰 것이었다. 08-24 실측(curl -sI 7면): rss.xml·llms.txt·robots.txt·sitemap은 ETag가
+#   있어 그 문장이 참이지만, **HTML 2면(/·/posts/*)만 ETag도 Last-Modified도 없다** —
+#   validator가 없으니 조건부 요청을 구성할 수단이 없고 304가 원리적으로 불가능하다.
+#   즉 HTML의 max-age=0 비용은 왕복이 아니라 **매 재검증마다 전문 전송**(/ 기준 와이어
+#   12,543B, zstd — 08-24판의 38,953B는 디코드 본문 바이트를 전송량으로 잘못 적은 것.
+#   2026-08-28 curl 실측 정정, 3.11배 과대였다).
+#   기전은 미실측(라이브 본문은 로컬 dist와 바이트 동일 — CF HTML 변조 기능은 배제됨,
+#   HTML도 css와 같은 env.ASSETS.fetch() 경로인데 왜 text/html에만 안 붙는지는 모른다).
+#   정책 자체(즉시 전파 > ~12.5KB/방문)는 유지 — Worker에서 ETag를 직접 붙이는 안(B)은
+#   별건 판단으로 미채택: 잘못 계산한 ETag는 낡은 사본을 살리는데 그게 정확히 이 제외가
+#   막으려는 사고이고, 지금 트래픽에서 ~12.5KB는 문제가 아니다(비용이 3배 싸져 기각
+#   근거는 오히려 강해졌다).
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
