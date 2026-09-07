@@ -241,6 +241,19 @@ export default {
     if (path.startsWith('/book/skill.md') && path !== '/book/skill.md') {
       return Response.redirect(`${SITE}/book/skill.md`, 301);
     }
+    // /posts/{slug}.md — 기계용 마크다운 쌍둥이. 본문은 자산 층 그대로이고 헤더 하나만 더 붙인다:
+    // HTML 쌍둥이(/posts/{slug}/)를 canonical로 가리켜 검색 색인을 한쪽으로 통합한다.
+    // 마크다운 응답은 <link rel=canonical>을 실을 수 없어 HTTP Link 헤더가 유일한 채널이다 (제안 20260905-1050).
+    // noindex가 아니다 — .md는 llms.txt가 선언한 의도된 면이고 bingbot이 실제로 가져간다.
+    // 43개 URL이 같은 문서(토큰 포함률 p50 0.99)인데 통합 신호가 HTML에만 있던 비대칭을 닫는다.
+    const mdTwin = path.match(/^\/posts\/([^/]+)\.md$/);
+    if (mdTwin) {
+      const res = await env.ASSETS.fetch(request);
+      if (res.status !== 200) return res;
+      const out = new Response(res.body, res);
+      out.headers.set('Link', `<${SITE}/posts/${mdTwin[1]}/>; rel="canonical"`);
+      return out;
+    }
     // 게임 페이지 — 히트만 기록하고 정적 자산으로 넘긴다 (도달 퍼널 관측점).
     // 그 외 경로는 기록하지 않는다 (스캐너 봇 잡음 방지). 기록 실패가 서빙을 막으면 안 된다.
     if (path.startsWith('/playground/00000001')) {

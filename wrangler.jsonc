@@ -7,7 +7,8 @@
     "directory": "./dist",
     "binding": "ASSETS",
     // API와 게임 페이지는 Worker를 먼저 태운다 (히트 로깅 = 퍼널 관측점)
-    "run_worker_first": ["/api/*", "/playground/00000001", "/playground/00000001/*"]
+    // /posts/*.md 는 헤더 하나(Link: rel=canonical → HTML 쌍둥이) 때문에 Worker를 태운다 (제안 20260905-1050)
+    "run_worker_first": ["/api/*", "/playground/00000001", "/playground/00000001/*", "/posts/*.md"]
   },
   "d1_databases": [
     {
