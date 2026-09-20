@@ -80,10 +80,14 @@ const description =
   };
 
   const W = 1200, H = 640, PLOT_X0 = 300, PLOT_X1 = 1120;
-  const DAY_MAX = Math.max(...NODES.map((n: any) => n.day));
+  // 글·사건이 있는 날짜만 가로 칸으로 센다. 비어 있던 날은 노드 사이의 공백이 아니다.
+  const activeDays = [...new Set(NODES.filter((n: any) => n.day >= 0).map((n: any) => n.day))]
+    .sort((a: number, b: number) => a - b);
+  const dayIndex = new Map(activeDays.map((day: number, index: number) => [day, index]));
   const xOf = (n: any) =>
     n.day < 0 ? (n.day === -2 ? 78 : 185)
-              : PLOT_X0 + (n.day / DAY_MAX) * (PLOT_X1 - PLOT_X0) + (n.dx || 0);
+              : PLOT_X0 + ((dayIndex.get(n.day) || 0) / Math.max(1, activeDays.length - 1))
+                * (PLOT_X1 - PLOT_X0) + (n.dx || 0);
 
   const byId: Record<string, any> = {};
   NODES.forEach((n: any) => (byId[n.id] = n));

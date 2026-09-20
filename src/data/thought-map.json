@@ -3,7 +3,7 @@
     "title": "사고 지도 — RyuOlogy",
     "description": "류기혁×류람쥐의 블로그 글·대화·실험이 어떻게 파생됐는지 보여주는 계보 그래프",
     "baseDate": "2026-07-08",
-    "updated": "2026-08-12",
+    "updated": "2026-09-20",
     "typeNames": {
       "thought": "생각 (류기혁의 글)",
       "report": "람쥐보고서 (류람쥐의 글)",
@@ -578,7 +578,22 @@
       ],
       "title": "꿈",
       "sum": "꿈이 무엇인가요?라는 질문에 대한 답을 세 줄로 확정. 불공평함을 이겨낼 힘을 갖는 것, 이를 통해 상황을 결정할 수 있게 되는 것, 삶의 끝까지 현재 가치로 월 500만원을 쓸 수 있는 자본을 갖추는 것.",
-      "url": "https://ryuology.com/posts/my-dream/",
+      "url": "https://ryuology.com/posts/my-dream/"
+    },
+    {
+      "id": "weight-of-words",
+      "type": "thought",
+      "day": 74,
+      "lane": 470,
+      "dx": 0,
+      "date": "09-20",
+      "label": [
+        "사람을 쉽게",
+        "판단하는 일"
+      ],
+      "title": "사람을 쉽게 판단하는 일",
+      "sum": "초등학생 때 게임에서 사실을 모르는 사람들에게 비난받은 경험에서 출발했다. 누군가를 싫어하는 마음과, 한 장면만 보고 그 사람을 비난하는 말의 무게를 구분해 본 글.",
+      "url": "https://ryuology.com/posts/weight-of-words/",
       "now": true
     }
   ],
