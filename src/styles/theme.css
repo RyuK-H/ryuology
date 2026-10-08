@@ -1,0 +1,26 @@
+  :root {
+    --bg: #f4f5f1;
+    --fg: #17191a;
+    --muted: #5b6455;
+    --faint: #8a9382;
+    --accent: #1d7a44;
+    --amber: #8a5a12;
+    --border: #dadfd4;
+    --code-bg: #e9ece4;
+    --panel: #e9ece4;
+    --scan: transparent;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c0f0d;
+      --fg: #e4e8e0;
+      --muted: #8b9484;
+      --faint: #545e4d;
+      --accent: #7dff9b;
+      --amber: #e7b45a;
+      --border: #1e251b;
+      --code-bg: #12160f;
+      --panel: #12160f;
+      --scan: rgba(255, 255, 255, 0.01);
+    }
+  }

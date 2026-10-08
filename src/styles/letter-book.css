@@ -1,0 +1,45 @@
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', sans-serif; }
+  a { color: var(--accent); text-underline-offset: .25em; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+  .top { max-width: 1180px; margin: auto; padding: 27px 36px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+  .top a { text-decoration: none; font-family: monospace; font-size: 19px; font-weight: bold; }
+  .top span { font-size: 12px; color: var(--muted); }
+  .book { max-width: 1120px; padding: 64px 36px 80px; margin: auto; display: grid; grid-template-columns: 210px minmax(0, 650px); gap: 72px; }
+  aside { align-self: start; position: sticky; top: 36px; }
+  .book-title { font-size: 18px; font-weight: 600; text-decoration: none; }
+  .byline { color: var(--muted); font-size: 12px; margin: 12px 0 36px; }
+  aside nav { display: grid; gap: 10px; }
+  aside nav a { font-size: 14px; line-height: 1.7; text-decoration: none; color: var(--muted); padding: 7px 12px; border-left: 2px solid transparent; }
+  aside nav a[aria-current] { color: var(--accent); border-color: var(--accent); background: var(--panel); }
+  main { min-width: 0; }
+  .eyebrow { margin: 0 0 22px; color: var(--muted); font-size: 11px; letter-spacing: .2em; }
+  h1 { font-family: 'Iowan Old Style', 'AppleMyungjo', 'Batang', serif; font-weight: 500; font-size: 32px; line-height: 1.6; letter-spacing: -.035em; margin: 0 0 40px; word-break: keep-all; overflow-wrap: anywhere; }
+  article { font-size: 17px; line-height: 2; word-break: keep-all; overflow-wrap: anywhere; }
+  article p { margin: 0 0 1.55em; }
+  article > p:first-child:has(a[href*="youtube.com"]) { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 22px; margin-top: -20px; margin-bottom: 34px; }
+  article li { padding-left: 5px; margin-bottom: 12px; }
+  article ol { padding-left: 24px; margin: 28px 0; }
+  .written { margin-top: 50px; font-size: 12px; color: var(--muted); line-height: 1.9; white-space: pre-line; }
+  .pagination { display: flex; justify-content: space-between; gap: 24px; border-top: 1px solid var(--border); margin-top: 30px; padding-top: 24px; }
+  .pagination a { font-size: 13px; line-height: 1.6; text-decoration: none; }
+  .cover-title { font-size: 52px; line-height: 1.5; margin-top: 20px; }
+  .cover-note { line-height: 1.9; color: var(--muted); font-size: 16px; }
+  .author { margin: 36px 0 55px; font-size: 14px; }
+  .contents { list-style: none; padding: 0; border-top: 1px solid var(--border); }
+  .contents a { display: flex; justify-content: space-between; gap: 20px; padding: 22px 0; text-decoration: none; border-bottom: 1px solid var(--border); line-height: 1.7; }
+  .continuing { margin-top: 36px; font-size: 13px; color: var(--muted); }
+  @media(max-width: 760px) {
+    .top { padding: 20px 22px; }
+    .book { display: block; padding: 28px 22px 60px; }
+    aside { position: static; border-bottom: 1px solid var(--border); margin-bottom: 38px; padding-bottom: 20px; }
+    .book-title { font-size: 16px; }
+    .byline { margin: 8px 0 15px; }
+    aside nav { gap: 4px; }
+    aside nav a { padding: 5px 10px; }
+    h1 { font-size: 27px; margin-bottom: 30px; }
+    article { font-size: 16px; line-height: 1.95; }
+    .cover-title { font-size: 43px; }
+    .pagination { flex-wrap: wrap; }
+  }

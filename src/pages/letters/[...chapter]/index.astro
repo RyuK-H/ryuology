@@ -1,0 +1,87 @@
+---
+import "../../../styles/theme.css";
+import "../../../styles/letter-book.css";
+import draft from '../../../../drafts/letters-to-my-children-01.md?raw';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+
+// The Markdown remains the single editable source. Publish only approved chapters.
+export function getStaticPaths() {
+  const headings = [...draft.matchAll(/^# (.+)$/gm)];
+  const allChapters = headings.map((heading, i) => ({
+    slug: i === 0 ? 'introduction' : `chapter-${i}`,
+    title: heading[1],
+    body: draft.slice(heading.index! + heading[0].length, headings[i + 1]?.index ?? draft.length)
+      .trim().replace(/\n---\s*$/, '').trim(),
+  }));
+  const publishedSlugs = new Set(['introduction', 'chapter-1']);
+  const chapters = import.meta.env.DEV ? allChapters : allChapters.filter(chapter => publishedSlugs.has(chapter.slug));
+  const date = draft.slice(0, headings[0]?.index ?? 0).trim();
+  return [
+    { params: { chapter: undefined }, props: { chapters, index: -1, date } },
+    ...chapters.map((chapter, index) => ({ params: { chapter: chapter.slug }, props: { chapters, index, date } })),
+  ];
+}
+
+const { chapters, index, date } = Astro.props;
+const current = chapters[index];
+const previous = chapters[index - 1];
+const next = chapters[index + 1];
+const processor = await createMarkdownProcessor({ smartypants: false });
+const body = current ? (await processor.render(current.body)).code : '';
+const title = '너에게 남기는 편지';
+const pageTitle = current ? `${current.title} · ${title}` : title;
+const description = '배우고 느끼는 것들을 적어, 언젠가 너에게 건네고 싶은 이야기.';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {import.meta.env.DEV && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="description" content={description} />
+    <meta name="author" content="류기혁" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={`${pageTitle} — RyuOlogy`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={new URL('/og.png', Astro.site)} />
+    <link rel="icon" href="/favicon.png" />
+    <title>{pageTitle} — RyuOlogy</title>
+  </head>
+  <body>
+    <header class="top"><a href="/">← RyuOlogy</a>{import.meta.env.DEV && <span>로컬 미리보기</span>}</header>
+    <div class="book">
+      <aside>
+        <a class="book-title" href="/letters/">{title}</a>
+        <p class="byline">류기혁 · 쓰고 있는 책</p>
+        <nav aria-label="책 목차">
+          <a href="/letters/" aria-current={index === -1 ? 'page' : undefined}>목차</a>
+          {chapters.map((chapter, i) => <a href={`/letters/${chapter.slug}/`} aria-current={i === index ? 'page' : undefined}>{chapter.title}</a>)}
+        </nav>
+      </aside>
+      <main>
+        {current ? <>
+          <p class="eyebrow">{index === 0 ? 'PROLOGUE' : `CHAPTER ${String(index).padStart(2, '0')}`}</p>
+          <h1>{current.title}</h1>
+          <article set:html={body} />
+          <p class="written">{date}</p>
+          <nav class="pagination" aria-label="장 이동">
+            <a href={previous ? `/letters/${previous.slug}/` : '/letters/'}>← {previous ? previous.title : '목차'}</a>
+            {next ? <a href={`/letters/${next.slug}/`}>{next.title} →</a> : <a href="/letters/">목차로 →</a>}
+          </nav>
+        </> : <>
+          <p class="eyebrow">LETTERS TO MY CHILDREN</p>
+          <h1 class="cover-title">너에게<br />남기는 편지</h1>
+          <p class="cover-note">배우고 느끼는 것들을 적어,<br />언젠가 너에게 건네고 싶은 이야기.</p>
+          <p class="author">류기혁</p>
+          <ol class="contents">
+            {chapters.map(chapter => <li><a href={`/letters/${chapter.slug}/`}>{chapter.title}<span aria-hidden="true">↗</span></a></li>)}
+          </ol>
+          <p class="continuing">이야기는 계속 이어집니다.</p>
+        </>}
+      </main>
+    </div>
+  </body>
+</html>

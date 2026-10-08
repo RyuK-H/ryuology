@@ -61,3 +61,12 @@ npx wrangler deploy
 - 로컬 테스트: `npx wrangler dev --compatibility-date 2026-05-03` (로컬 런타임이 구버전) + `.dev.vars`.
 
 사이트 제목·태그라인·소개·저자는 `src/site.ts`에서 관리.
+
+## 너에게 남기는 편지
+
+상단 ‘편지’ 메뉴의 `/letters/`에서 표지·목차, 들어가며, 각 장을 읽는다.
+원문은 `drafts/letters-to-my-children-01.md` 한 곳에서 편집하고, 최상위 제목(`#`)으로 장을 나눈다.
+현재 발행 승인된 장은 들어가며와 1장이다. `src/pages/letters/[...chapter]/index.astro`의
+`publishedSlugs`가 공개 범위를 정하며, 이후 추가한 장은 로컬 개발 서버에서만 보인다.
+새 장은 검토·승인 후 공개 목록에 추가하고 빌드·배포한다. 발행된 장의 순서를 임의로 바꾸지 않는다.
+책은 일반 글 피드와 별도로 제공되며, 공개 페이지는 사이트맵에 포함된다.

@@ -1,4 +1,5 @@
 ---
+import "../styles/theme.css";
 import { SITE } from '../site';
 
 interface Props {
@@ -23,6 +24,7 @@ const nav = [
   { href: '/posts/', ko: '글', en: 'writing' },
   { href: '/map/', ko: '사고 지도', en: 'map' },
   { href: '/book/', ko: '책', en: 'book' },
+  { href: '/letters/', ko: '편지', en: 'letters' },
   { href: '/playground/', ko: '놀이터', en: 'play' },
   { href: '/about/', ko: '소개', en: 'about' },
   { href: '/rss.xml', ko: 'RSS', en: 'feed' },
@@ -177,32 +179,6 @@ const nav = [
   /* Terminal theme — light default (paper terminal), dark via prefers-color-scheme (CRT).
      Variable contract (--bg/--fg/--muted/--accent/--border/--code-bg) kept so scoped
      component styles keep working; --amber/--faint/--panel/--scan are additions. */
-  :root {
-    --bg: #f4f5f1;
-    --fg: #17191a;
-    --muted: #5b6455;
-    --faint: #8a9382;
-    --accent: #1d7a44;
-    --amber: #8a5a12;
-    --border: #dadfd4;
-    --code-bg: #e9ece4;
-    --panel: #e9ece4;
-    --scan: transparent;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0c0f0d;
-      --fg: #e4e8e0;
-      --muted: #8b9484;
-      --faint: #545e4d;
-      --accent: #7dff9b;
-      --amber: #e7b45a;
-      --border: #1e251b;
-      --code-bg: #12160f;
-      --panel: #12160f;
-      --scan: rgba(255, 255, 255, 0.01);
-    }
-  }
   * {
     box-sizing: border-box;
   }
